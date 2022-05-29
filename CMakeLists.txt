@@ -4,8 +4,7 @@ project(CmfNetLib)
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB SRC_FILES
-        "${PROJECT_SOURCE_DIR}/NetLib/log/*.h"
-        "${PROJECT_SOURCE_DIR}/NetLib/log/*.cpp")
+        "${PROJECT_SOURCE_DIR}/NetLib/log/*.hpp")
 
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
