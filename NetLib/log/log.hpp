@@ -10,6 +10,8 @@
 #include <chrono>
 #include <thread>
 #include <sstream>
+#include <fstream>
+#include <mutex>
 
 /*
  * 日志级别
@@ -32,12 +34,18 @@ class LogEvent {
 public:
     using ptr = std::shared_ptr<LogEvent>;
 
-    LogEvent(const std::string &level, const std::string &fileName, const uint32_t line, const std::string &time,
-             const std::string &msg,
-             const std::string &threadName = "")
-            : _level(FromString(level)), _fileName(fileName), _line(line), _time(time),
-              _msg(msg),
-              _threadName(threadName),
+    template<typename ...Args>
+    LogEvent(LogLevel level,
+             const std::string &fileName,
+             const uint32_t line,
+             const std::string &time,
+             const std::string &format,
+             const Args &...args)
+            : _level(level),
+              _fileName(fileName),
+              _line(line),
+              _time(time),
+              _msg(LogFormat(format, args...)),
               _threadId(std::this_thread::get_id()) {
     }
 
@@ -61,6 +69,14 @@ public:
             default:
                 return "NONE";
         }
+    }
+
+    template<typename ... Args>
+    std::string LogFormat(const std::string &format, Args &... args) {
+        size_t size = std::snprintf(nullptr, 0, format.c_str(), args ...) + 1;
+        std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
+        std::snprintf(buf.get(), size, format.c_str(), args ...);
+        return std::string(buf.get(), buf.get() + size - 1);
     }
 
     static LogLevel FromString(const std::string &str) noexcept {
@@ -106,14 +122,11 @@ public:
 private:
     uint32_t _line = 0;
     std::thread::id _threadId;
-    std::string _threadName;
     std::string _fileName;
     std::string _time;
     std::string _msg;
     LogLevel _level;
     std::stringstream _ss;
-    std::shared_ptr<Logger> _logger;
-
 };
 
 /*
@@ -141,18 +154,90 @@ public:
                 static_cast<int>(ptm->tm_sec));
         return std::move(std::string(date));
     }
+};
 
-    void Log(const LogEvent::ptr event) {
+class LogAppender {
+public:
+    using ptr = std::shared_ptr<LogAppender>;
+
+    LogAppender() = default;
+
+    virtual ~LogAppender() noexcept {}
+
+    virtual void Log(const LogEvent::ptr event) = 0;
+};
+
+/*
+ * 输出到控制台
+ */
+class StdoutLogAppender : public LogAppender {
+public:
+    using ptr = std::shared_ptr<StdoutLogAppender>;
+
+    virtual void Log(const LogEvent::ptr event) override {
+
+        std::lock_guard<std::mutex> lk(_mtx);
         std::cout << event->GetTime() << " "
                   << event->ToString(event->GetLevel()) << " "
                   << event->GetThreadId() << " "
                   << event->GetFileName() << " "
                   << event->GetLine() << " "
-                  << event->GetMsg() << " " << std::endl;
+                  << event->GetMsg() << std::endl;
     }
 
 private:
-    std::shared_ptr<LogEvent::ptr> _logEvent;
+    std::mutex _mtx;
 };
+
+/*
+ * 输出到文件
+ */
+class FileLogAppender : public LogAppender {
+public:
+    using ptr = std::shared_ptr<FileLogAppender>;
+
+    FileLogAppender(const std::string &fileName) : _fileName(fileName) {
+        if (_ofs.is_open()) {
+            _ofs.close();
+        }
+        _ofs.open(_fileName.c_str(), std::ios::out | std::ios::app | std::ios::binary);
+    }
+
+    ~FileLogAppender() {
+        if (_ofs.is_open()) {
+            _ofs.flush();
+            _ofs.close();
+        }
+    }
+
+    virtual void Log(const LogEvent::ptr event) override {
+        if (_ofs.is_open()) {
+            _ofs << event->GetTime() << " "
+                 << event->ToString(event->GetLevel()) << " "
+                 << event->GetThreadId() << " "
+                 << event->GetFileName() << " "
+                 << event->GetLine() << " "
+                 << event->GetMsg() << " " << std::endl;
+        }
+    }
+
+private:
+    std::string _fileName;
+    std::ofstream _ofs;
+
+};
+
+#define LOG_BASE(level, fmt, ...) \
+Logger& logger = Logger::GetInstance();\
+LogAppender::ptr logAppender = std::make_shared<StdoutLogAppender>();\
+LogEvent::ptr event = std::make_shared<LogEvent>(level,__FILE__,__LINE__,logger.GetCurrentSystemTime(),fmt,__VA_ARGS__);\
+logAppender->Log(event);
+
+#define LOG_DEBUG(fmt, ...) LOG_BASE(LogLevel::DEBUG,fmt,__VA_ARGS__)
+#define LOG_INFO(fmt, ...)LOG_BASE(LogLevel::INFO,fmt,__VA_ARGS__)
+#define LOG_WARN(fmt, ...) LOG_BASE(LogLevel::WARN,fmt,__VA_ARGS__)
+#define LOG_ERROR(fmt, ...)LOG_BASE(LogLevel::ERROR,fmt,__VA_ARGS__)
+#define LOG_FATAL(fmt, ...)LOG_BASE(LogLevel::FATAL,fmt,__VA_ARGS__)
+
 
 #endif //CMFNETLIB_LOG_HPP

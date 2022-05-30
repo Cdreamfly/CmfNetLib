@@ -11,3 +11,5 @@ include_directories(
 )
 
 add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
+find_package(Threads)
+target_link_libraries (${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
