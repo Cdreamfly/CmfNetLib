@@ -126,7 +126,6 @@ private:
     std::string _time;
     std::string _msg;
     LogLevel _level;
-    std::stringstream _ss;
 };
 
 /*
@@ -175,18 +174,17 @@ public:
     using ptr = std::shared_ptr<StdoutLogAppender>;
 
     virtual void Log(const LogEvent::ptr event) override {
-
-        std::lock_guard<std::mutex> lk(_mtx);
-        std::cout << event->GetTime() << " "
-                  << event->ToString(event->GetLevel()) << " "
-                  << event->GetThreadId() << " "
-                  << event->GetFileName() << " "
-                  << event->GetLine() << " "
-                  << event->GetMsg() << std::endl;
+        _ss << event->GetTime() << " "
+            << event->ToString(event->GetLevel()) << " "
+            << event->GetThreadId() << " "
+            << event->GetFileName() << " "
+            << event->GetLine() << " "
+            << event->GetMsg() << std::endl;
+        std::cout << _ss.str();
     }
 
 private:
-    std::mutex _mtx;
+    std::stringstream _ss;
 };
 
 /*

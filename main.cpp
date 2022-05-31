@@ -1,21 +1,20 @@
 #include <iostream>
 #include "NetLib/log/log.hpp"
-#include <vector>
+#include "NetLib/thread/threadpool.hpp"
 
 int main() {
 
-    std::vector<std::thread> threads;
-    for (int i = 0; i < 10; ++i) {
-        threads.push_back(std::thread([]() {
-            for(int i = 0 ;i<10;++i)
-            {
-                LOG_INFO("Just a FMT INFO Test! %d, %s", 1, "中文");
-                //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            }
-        }));
+    ThreadPool *pool = new ThreadPool(4);
+    std::vector<std::future<int>> rets;
+    for (int i = 0; i < 100; i++) {
+        rets.emplace_back(std::move(pool->Commit([i]() -> int {
+            std::cout << "id:" << std::this_thread::get_id() << std::endl;
+            return i;
+        })));
     }
-    for (auto &thread: threads) {
-        thread.join();
+    for (auto &ret: rets) {
+        LOG_INFO("%d", ret.get());
     }
+    delete pool;
     return 0;
 }
