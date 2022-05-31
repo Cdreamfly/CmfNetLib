@@ -9,6 +9,6 @@
 class copyable
 {
 protected:
-    copyable() = delete;
-    ~copyable() = delete;
+    copyable() = default;
+    ~copyable() = default;
 };

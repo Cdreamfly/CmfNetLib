@@ -3,8 +3,8 @@
 //
 
 #include <iostream>
-#include "NetLib/log/log.hpp"
-#include "NetLib/thread/threadpool.hpp"
+#include "NetLib/log/Log.hpp"
+#include "NetLib/thread/ThreadPool.hpp"
 
 int main() {
 
