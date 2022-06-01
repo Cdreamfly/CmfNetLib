@@ -8,6 +8,7 @@
 #include "NetLib/log/Log.hpp"
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/uio.h>
 
 
 namespace Sockets {
@@ -53,6 +54,14 @@ namespace Sockets {
         if (close(fd) < 0) {
             LOG_FATAL("Sockets::Close");
         }
+    }
+
+    ssize_t Readv(int fd, const iovec *iov, int iovcnt) {
+        return readv(fd,iov,iovcnt);
+    }
+
+    ssize_t Write(int fd, const void *buf, size_t size) {
+        return write(fd,buf,size);
     }
 }
 
