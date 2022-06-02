@@ -6,6 +6,7 @@
 #define CMFNETLIB_LOG_HPP
 
 #include "NetLib/base/noncopyable.h"
+#include "NetLib/base/Timestamp.hpp"
 #include <memory>
 #include <chrono>
 #include <thread>
@@ -141,17 +142,7 @@ public:
     }
 
     const std::string GetCurrentSystemTime() {
-        auto t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-        struct tm *ptm = localtime(&t);
-        char date[60] = {0};
-        sprintf(date, "%4d-%02d-%02d %02d:%02d:%02d",
-                static_cast<int>(ptm->tm_year + 1900),
-                static_cast<int>(ptm->tm_mon + 1),
-                static_cast<int>(ptm->tm_mday),
-                static_cast<int>(ptm->tm_hour),
-                static_cast<int>(ptm->tm_min),
-                static_cast<int>(ptm->tm_sec));
-        return std::move(std::string(date));
+        return Timestamp::Now().ToString();
     }
 };
 

@@ -113,10 +113,12 @@ public:
         ssize_t len = Sockets::Write(fd, Peek(), ReadableBytes());
         if (len < 0) {
             *savedErrno = errno;
+            //return len;
         }
         //把可读出数据全部发送了是不是应该初始化下标，还是更新可读出下表
         //_readIndex = CheapPrepend;
         //_writerIndex = CheapPrepend;
+
         //_readIndex += len;
         return len;
     }
@@ -133,7 +135,6 @@ private:
             _writerIndex = CheapPrepend;
             _readIndex = CheapPrepend + readSize;
         }
-
     }
 
     char *Begin() {
