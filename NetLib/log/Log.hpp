@@ -142,7 +142,7 @@ public:
     }
 
     const std::string GetCurrentSystemTime() {
-        return Timestamp::Now().ToString();
+        return std::move(Timestamp::Now().ToString());
     }
 };
 

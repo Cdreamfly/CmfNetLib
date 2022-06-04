@@ -1,20 +1,26 @@
 #include <iostream>
 #include "NetLib/log/Log.hpp"
 #include "NetLib/thread/ThreadPool.hpp"
+#include "NetLib/net/Buffer.hpp"
+#include "NetLib/net/InetAddress.hpp"
+#include "NetLib/net/Socket.hpp"
+#include "NetLib/net/EventLoop.cpp"
+#include "NetLib/net/Channel.h"
 
 int main() {
 
-    ThreadPool *pool = new ThreadPool(4);
-    std::vector<std::future<int>> rets;
-    for (int i = 0; i < 100; i++) {
-        rets.emplace_back(std::move(pool->Commit([i]() -> int {
-            std::cout << "id:" << std::this_thread::get_id() << std::endl;
-            return i;
-        })));
-    }
-    for (auto &ret: rets) {
-        LOG_INFO("%d", ret.get());
-    }
-    delete pool;
+    Buffer buffer;
+    buffer.Append("hello");
+    std::cout << buffer.WritableBytes() << " ";
+    std::cout << buffer.ReadableBytes() << std::endl;
+
+    InetAddress address("127.0.0.1", 9190);
+    std::cout << address.GetIP() << " " << address.GetPort() << std::endl;
+
+    Socket sock(100);
+    std::cout << sock.GetFd() << std::endl;
+    EventLoop::ptr loop;
+    Channel channel(loop,1);
+
     return 0;
 }

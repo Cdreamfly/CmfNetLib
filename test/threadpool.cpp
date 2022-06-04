@@ -12,7 +12,7 @@ int main() {
     std::vector<std::future<int>> rets;
     for (int i = 0; i < 100; i++) {
         rets.emplace_back(std::move(pool->Commit([i]() -> int {
-            std::cout << "id:" << std::this_thread::get_id() << std::endl;
+            LOG_INFO("%d", std::this_thread::get_id());
             return i;
         })));
     }

@@ -8,10 +8,13 @@
 #include <stdint.h>
 #include <chrono>
 #include <string>
-#include"copyable.h"
+#include <memory>
+#include "copyable.h"
 
 class Timestamp : public copyable {
 public:
+    using ptr = std::shared_ptr<Timestamp>;
+
     Timestamp() : _microSecondsSinceEpoch(0) {}
 
     explicit Timestamp(int64_t microSecondsSinceEpoch) : _microSecondsSinceEpoch(microSecondsSinceEpoch) {

@@ -24,7 +24,7 @@ public:
         Sockets::Close(_fd);
     }
 
-    int Fd() const {
+    int GetFd() const {
         return _fd;
     }
 
