@@ -4,7 +4,7 @@
 #include "Poller.h"
 #include "EPollPoller.h"
 
-Poller *Poller::NewDefaultPoller(EventLoop::ptr loop) {
+Poller *Poller::NewDefaultPoller(EventLoop *loop) {
     // 通过此环境变量来决定使用poll还是epoll
     if (getenv("MUDUO_USE_POLL")) {
         return nullptr;

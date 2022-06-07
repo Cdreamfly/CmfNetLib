@@ -23,7 +23,7 @@ public:
     using ReadEventCallback = std::function<void(Timestamp::ptr)>;//读事件回调
 
 
-    Channel(EventLoop::ptr loop, int fd) : _loop(loop), _fd(fd), _events(0), _revents(0), _index(-1), _tied(false) {
+    Channel(EventLoop *loop, int fd) : _loop(loop), _fd(fd), _events(0), _revents(0), _index(-1), _tied(false) {
     }
 
     /**
@@ -31,34 +31,34 @@ public:
      * @param cb
      */
     void SetReadCallback(ReadEventCallback cb) {
-        _readCallback = std::move(cb);
+        this->_readCallback = std::move(cb);
     }
 
     void SetWriteCallback(EventCallback cb) {
-        _writeCallback = std::move(cb);
+        this->_writeCallback = std::move(cb);
     }
 
     void SetCloseCallback(EventCallback cb) {
-        _closeCallback = std::move(cb);
+        this->_closeCallback = std::move(cb);
     }
 
     void SetErrorCallback(EventCallback cb) {
-        _errorCallback = std::move(cb);
+        this->_errorCallback = std::move(cb);
     }
 
     /**
      * 返回fd当前的事件状态
      */
     bool IsNoneEvent() const {
-        return _events == NoneEvent;
+        return this->_events == this->NoneEvent;
     }
 
     bool IsWriting() const {
-        return _events & WriteEvent;
+        return this->_events & this->WriteEvent;
     }
 
     bool IsReading() const {
-        return _events & ReadEvent;
+        return this->_events & this->ReadEvent;
     }
 
     /**
@@ -75,27 +75,27 @@ public:
     void DisableAll();
 
     uint32_t Revents() const {
-        return _revents;
+        return this->_revents;
     }
 
     void SetRevents(uint32_t revt) {
-        _revents = revt;
+        this->_revents = revt;
     }
 
     int Index() const {
-        return _index;
+        return this->_index;
     }
 
     void SetIndex(int index) {
-        _index = index;
+        this->_index = index;
     }
 
     uint32_t Events() const {
-        return _events;
+        return this->_events;
     }
 
     int Fd() const {
-        return _fd;
+        return this->_fd;
     }
 
     void Remove();
@@ -105,8 +105,8 @@ public:
      * @param obj
      */
     void Tie(std::shared_ptr<void> &obj) {
-        _tie = obj;
-        _tied = true;
+        this->_tie = obj;
+        this->_tied = true;
     }
 
     /**
@@ -114,13 +114,13 @@ public:
      * @param receiveTime
      */
     void HandleEvent(Timestamp::ptr receiveTime) {
-        if (_tied) {
-            std::shared_ptr<void> guard = _tie.lock();
+        if (this->_tied) {
+            std::shared_ptr<void> guard = this->_tie.lock();
             if (guard) {
-                HandleEventWithGuard(receiveTime);
+                this->HandleEventWithGuard(receiveTime);
             }
         } else {
-            HandleEventWithGuard(receiveTime);
+            this->HandleEventWithGuard(receiveTime);
         }
     }
 
@@ -138,24 +138,24 @@ private:
      */
     void HandleEventWithGuard(Timestamp::ptr receiveTime) {
         LOG_INFO("channel handleEvent revents:%d", Revents());
-        if ((_revents & EPOLLHUP) && !(_revents & EPOLLIN)) {
-            if (_closeCallback) {
-                _closeCallback();
+        if ((this->_revents & EPOLLHUP) && !(this->_revents & EPOLLIN)) {
+            if (this->_closeCallback) {
+                this->_closeCallback();
             }
         }
-        if (_revents & EPOLLERR) {
-            if (_errorCallback) {
-                _errorCallback();
+        if (this->_revents & EPOLLERR) {
+            if (this->_errorCallback) {
+                this->_errorCallback();
             }
         }
-        if (_revents & (EPOLLIN | EPOLLPRI)) {
-            if (_readCallback) {
-                _readCallback(receiveTime);
+        if (this->_revents & (EPOLLIN | EPOLLPRI)) {
+            if (this->_readCallback) {
+                this->_readCallback(receiveTime);
             }
         }
-        if (_revents & EPOLLOUT) {
-            if (_writeCallback) {
-                _writeCallback();
+        if (this->_revents & EPOLLOUT) {
+            if (this->_writeCallback) {
+                this->_writeCallback();
             }
         }
     }
@@ -167,7 +167,7 @@ private:
     static const int ReadEvent = EPOLLIN | EPOLLET; //可读事件
     static const int WriteEvent = EPOLLOUT; //可写事件
 
-    EventLoop::ptr _loop;   //channel所属的loop,一个channel只属于一个loop
+    EventLoop *_loop;   //channel所属的loop,一个channel只属于一个loop
     const int _fd;          //channel所属的文件描述符
     uint32_t _events;       //注册的事件
     uint32_t _revents;      //poller设置的就绪的事件

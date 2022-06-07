@@ -12,13 +12,12 @@ struct epoll_event;
 class EPollPoller : public Poller {
 public:
     using ptr = std::shared_ptr<EPollPoller>;
-    using EventList = std::vector<epoll_event>;
 
-    EPollPoller(EventLoop::ptr loop);
+    EPollPoller(EventLoop *loop);
 
     ~EPollPoller() override;
 
-    Timestamp Poll(int timeoutMs, ChannelList *activeChannels) override;
+    Timestamp::ptr Poll(int timeoutMs, ChannelList *activeChannels) override;
 
     void UpdateChannel(Channel *channel) override;
 
@@ -27,7 +26,13 @@ public:
 private:
     static const int InitEventListSize = 16;
 
-public:
+    void FillActiveChannels(int numEvents, ChannelList *activeChannels) const;
+
+    void Update(int operation, Channel *channel);
+
+    using EventList = std::vector<epoll_event>;
+
+private:
     int _epollFd;
     EventList _events;
 };

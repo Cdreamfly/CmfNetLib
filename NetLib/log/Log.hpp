@@ -164,7 +164,8 @@ class StdoutLogAppender : public LogAppender {
 public:
     using ptr = std::shared_ptr<StdoutLogAppender>;
 
-    virtual void Log(const LogEvent::ptr event) override {
+    void Log(const LogEvent::ptr event) override {
+        std::stringstream _ss;
         _ss << event->GetTime() << " "
             << event->ToString(event->GetLevel()) << " "
             << event->GetThreadId() << " "
@@ -173,9 +174,6 @@ public:
             << event->GetMsg() << std::endl;
         std::cout << _ss.str();
     }
-
-private:
-    std::stringstream _ss;
 };
 
 /*
@@ -215,18 +213,16 @@ private:
     std::ofstream _ofs;
 
 };
-
+Logger &logger = Logger::GetInstance();
+LogAppender::ptr logAppender = std::make_shared<StdoutLogAppender>();
 #define LOG_BASE(level, fmt, ...) \
-Logger& logger = Logger::GetInstance();\
-LogAppender::ptr logAppender = std::make_shared<StdoutLogAppender>();\
-LogEvent::ptr event = std::make_shared<LogEvent>(level,__FILE__,__LINE__,logger.GetCurrentSystemTime(),fmt,##__VA_ARGS__);\
-logAppender->Log(event);
+logAppender->Log(std::make_shared<LogEvent>(level,__FILE__,__LINE__,logger.GetCurrentSystemTime(),fmt,##__VA_ARGS__));
 
 #define LOG_DEBUG(fmt, ...) LOG_BASE(LogLevel::DEBUG,fmt,##__VA_ARGS__)
-#define LOG_INFO(fmt, ...)LOG_BASE(LogLevel::INFO,fmt,##__VA_ARGS__)
-#define LOG_WARN(fmt, ...) LOG_BASE(LogLevel::WARN,fmt,##__VA_ARGS__)
-#define LOG_ERROR(fmt, ...)LOG_BASE(LogLevel::ERROR,fmt,##__VA_ARGS__)
-#define LOG_FATAL(fmt, ...)LOG_BASE(LogLevel::FATAL,fmt,##__VA_ARGS__)
+#define LOG_INFO(fmt, ...)  LOG_BASE(LogLevel::INFO,fmt,##__VA_ARGS__)
+#define LOG_WARN(fmt, ...)  LOG_BASE(LogLevel::WARN,fmt,##__VA_ARGS__)
+#define LOG_ERROR(fmt, ...) LOG_BASE(LogLevel::ERROR,fmt,##__VA_ARGS__)
+#define LOG_FATAL(fmt, ...) LOG_BASE(LogLevel::FATAL,fmt,##__VA_ARGS__)
 
 
 #endif //CMFNETLIB_LOG_HPP

@@ -9,7 +9,7 @@
 #include <vector>
 #include "NetLib/base/noncopyable.h"
 #include "NetLib/base/Timestamp.hpp"
-#include "EventLoop.cpp"
+#include "EventLoop.h"
 
 /**
  * poller监听的就是eventloop保存的那些channel
@@ -20,11 +20,11 @@ class Poller : private noncopyable {
 public:
     using ChannelList = std::vector<Channel *>;
 
-    Poller(EventLoop::ptr loop);
+    Poller(EventLoop *loop);
 
     virtual ~Poller() = default;
 
-    virtual Timestamp Poll(int timeoutMs, ChannelList *activeChannels) = 0;
+    virtual Timestamp::ptr Poll(int timeoutMs, ChannelList *activeChannels) = 0;
 
     virtual void UpdateChannel(Channel *channel) = 0;
 
@@ -42,7 +42,7 @@ public:
      * @param loop
      * @return
      */
-    static Poller *NewDefaultPoller(EventLoop::ptr loop);
+    static Poller *NewDefaultPoller(EventLoop *loop);
 
 protected:
     using ChannelMap = std::unordered_map<int, Channel *>;

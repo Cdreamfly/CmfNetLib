@@ -4,8 +4,9 @@
 #include "NetLib/net/Buffer.hpp"
 #include "NetLib/net/InetAddress.hpp"
 #include "NetLib/net/Socket.hpp"
-#include "NetLib/net/EventLoop.cpp"
+#include "NetLib/net/EventLoop.h"
 #include "NetLib/net/Channel.h"
+#include "NetLib/net/EPollPoller.h"
 
 int main() {
 
@@ -19,8 +20,10 @@ int main() {
 
     Socket sock(100);
     std::cout << sock.GetFd() << std::endl;
-    EventLoop::ptr loop;
-    Channel channel(loop,1);
+    EventLoop*loop;
+    Channel channel(loop, 1);
+    LOG_DEBUG("HELLO");
+    LOG_INFO("HELLO");
 
     return 0;
 }
