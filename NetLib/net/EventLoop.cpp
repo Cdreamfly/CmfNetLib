@@ -71,3 +71,66 @@ void EventLoop::Quit() {
         this->WakeUp();
     }
 }
+
+void EventLoop::RunInLoop(Functor cb) {
+    if (this->IsInLoopThread()) {
+        cb();
+    } else {
+        this->QueueInLoop(cb);
+    }
+}
+
+bool EventLoop::IsInLoopThread() const {
+    return this->_threadId == std::this_thread::get_id();
+}
+
+void EventLoop::QueueInLoop(Functor cb) {
+    {
+        std::unique_lock<std::mutex>(_mtx);
+        _pendingFunctors.emplace_back(cb);
+    }
+    if (!this->IsInLoopThread() || this->_callingPendingFunctors) {
+        this->WakeUp();
+    }
+}
+
+void EventLoop::HandleRead() {
+    uint64_t one = 1;
+    ssize_t n = read(_wakeupFd, &one, sizeof(one));
+    if (n != sizeof(one)) {
+        LOG_ERROR("EventLoop::handleRead() reads % lu bytes instead of 8", n);
+    }
+}
+
+void EventLoop::WakeUp() {
+    uint64_t one;
+    ssize_t n = write(_wakeupFd, &one, sizeof(one));
+    if (n != sizeof(one)) {
+        LOG_ERROR("EventLoop::wakeup() writes % lu bytes instead of 8", n);
+    }
+}
+
+void EventLoop::UpdateChannel(Channel *channel) {
+    this->_poller->UpdateChannel(channel);
+}
+
+void EventLoop::RemoveChannel(Channel *channel) {
+    this->_poller->RemoveChannel(channel);
+}
+
+void EventLoop::HasChannel(Channel *channel) {
+    this->_poller->HasChannel(channel);
+}
+
+void EventLoop::DoPendingFunctors() {
+    std::vector<Functor> functors;
+    _callingPendingFunctors = true;
+    {
+        std::unique_lock<std::mutex> lk(_mtx);
+        functors.swap(_pendingFunctors);
+    }
+    for (const Functor &functor: functors) {
+        functor();
+    }
+    _callingPendingFunctors = false;
+}
