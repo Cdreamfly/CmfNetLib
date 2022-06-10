@@ -6,7 +6,7 @@
 #define CMFNETLIB_SOCKET_HPP
 
 #include "NetLib/base/noncopyable.h"
-#include "NetLib/net/SocketOps.hpp"
+#include "NetLib/net/SocketOps.h"
 #include "NetLib/net/InetAddress.hpp"
 
 #include <netinet/tcp.h>
@@ -28,15 +28,19 @@ public:
         return _fd;
     }
 
-    void Bind(const InetAddress::ptr addr) const {
-        Sockets::Bind(_fd, addr->GetSockAddr());
+    void Bind(const InetAddress &addr) const {
+        Sockets::Bind(_fd, addr.GetSockAddr());
     }
 
     void Listen() const {
         Sockets::Listen(_fd);
     }
 
-    int Accept(InetAddress::ptr peeraddr) {
+    void ShutdownWrite() {
+        Sockets::ShutdownWrite(_fd);
+    }
+
+    int Accept(InetAddress *peeraddr) {
         sockaddr_in addr;
         memset(&addr, 0, sizeof(addr));
         int fd = Sockets::Accept(_fd, &addr);
@@ -64,14 +68,15 @@ public:
         }
     }
 
-    void setKeepAlive(bool on) {
+    void SetKeepAlive(bool on) {
         int optval = on ? 1 : 0;
         setsockopt(_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, static_cast<socklen_t>(sizeof(optval)));
     }
 
-    void setnonblocking() {
+    void Setnonblocking() {
         fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL) | O_NONBLOCK);
     }
+
 
 private:
     const int _fd;

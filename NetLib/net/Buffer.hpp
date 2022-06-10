@@ -6,7 +6,7 @@
 #define CMFNETLIB_BUFFER_HPP
 
 #include "NetLib/base/copyable.h"
-#include "SocketOps.hpp"
+#include "SocketOps.h"
 #include <memory>
 #include <vector>
 #include <atomic>
@@ -50,6 +50,17 @@ public:
         } else {
             RetrieveAll();
         }
+    }
+
+    //把onMessage函数上报的Buffer数据，转成string类型的数据返回
+    std::string RetrieveAllAsString() {
+        return RetrieveAsString(ReadableBytes());//应用可读取数据的长度
+    }
+
+    std::string RetrieveAsString(size_t len) {
+        std::string result(Peek(), len);
+        Retrieve(len);
+        return result;
     }
 
     //读出全部字节

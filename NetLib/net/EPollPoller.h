@@ -17,7 +17,7 @@ public:
 
     ~EPollPoller() override;
 
-    Timestamp::ptr Poll(int timeoutMs, ChannelList *activeChannels) override;
+    Timestamp Poll(int timeoutMs, ChannelList *activeChannels) override;
 
     void UpdateChannel(Channel *channel) override;
 

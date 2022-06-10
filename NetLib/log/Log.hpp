@@ -2,8 +2,7 @@
 // Created by Cmf on 2022/5/23.
 //
 
-#ifndef CMFNETLIB_LOG_HPP
-#define CMFNETLIB_LOG_HPP
+#pragma once
 
 #include "NetLib/base/noncopyable.h"
 #include "NetLib/base/Timestamp.hpp"
@@ -13,6 +12,7 @@
 #include <sstream>
 #include <fstream>
 #include <mutex>
+#include <iostream>
 
 /*
  * 日志级别
@@ -213,16 +213,12 @@ private:
     std::ofstream _ofs;
 
 };
-Logger &logger = Logger::GetInstance();
-LogAppender::ptr logAppender = std::make_shared<StdoutLogAppender>();
+
 #define LOG_BASE(level, fmt, ...) \
-logAppender->Log(std::make_shared<LogEvent>(level,__FILE__,__LINE__,logger.GetCurrentSystemTime(),fmt,##__VA_ARGS__));
+std::make_shared<StdoutLogAppender>()->Log(std::make_shared<LogEvent>(level,__FILE__,__LINE__,Logger::GetInstance().GetCurrentSystemTime(),fmt,##__VA_ARGS__));
 
 #define LOG_DEBUG(fmt, ...) LOG_BASE(LogLevel::DEBUG,fmt,##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)  LOG_BASE(LogLevel::INFO,fmt,##__VA_ARGS__)
 #define LOG_WARN(fmt, ...)  LOG_BASE(LogLevel::WARN,fmt,##__VA_ARGS__)
 #define LOG_ERROR(fmt, ...) LOG_BASE(LogLevel::ERROR,fmt,##__VA_ARGS__)
 #define LOG_FATAL(fmt, ...) LOG_BASE(LogLevel::FATAL,fmt,##__VA_ARGS__)
-
-
-#endif //CMFNETLIB_LOG_HPP

@@ -2,8 +2,7 @@
 // Created by Cmf on 2022/5/31.
 //
 
-#ifndef CMFNETLIB_SOCKETOPS_HPP
-#define CMFNETLIB_SOCKETOPS_HPP
+#pragma once
 
 #include "NetLib/log/Log.hpp"
 #include <arpa/inet.h>
@@ -11,8 +10,9 @@
 #include <sys/uio.h>
 
 
-namespace Sockets {
-    int CreateNonblockingSocket() {
+class Sockets {
+public:
+    static int CreateNonblockingSocket() {
         int fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
         if (fd < 0) {
             LOG_FATAL("Sockets::CreateNonblockingSocket");
@@ -20,19 +20,19 @@ namespace Sockets {
         return fd;
     }
 
-    void Bind(int fd, const sockaddr *addr) {
+    static void Bind(int fd, const sockaddr *addr) {
         if (bind(fd, addr, sizeof(addr)) < 0) {
             LOG_FATAL("Sockets::Bind");
         }
     }
 
-    void Listen(int fd) {
+    static void Listen(int fd) {
         if (listen(fd, SOMAXCONN) < 0) {
             LOG_FATAL("Sockets::Listen");
         }
     }
 
-    int Accept(int fd, sockaddr_in *addr) {
+    static int Accept(int fd, sockaddr_in *addr) {
         socklen_t addrlen = static_cast<socklen_t>(sizeof(*addr));
         int connfd = accept4(fd, (sockaddr *) addr, &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC);
         if (connfd < 0) {
@@ -43,26 +43,30 @@ namespace Sockets {
                     errno = no;
                     break;
                 case EOPNOTSUPP:
-                LOG_FATAL("unexpected error of ::accept %d", no);
+                    LOG_FATAL("unexpected error of ::accept %d", no);
                     break;
             }
         }
         return connfd;
     }
 
-    void Close(int fd) {
+    static void Close(int fd) {
         if (close(fd) < 0) {
             LOG_FATAL("Sockets::Close");
         }
     }
 
-    ssize_t Readv(int fd, const iovec *iov, int iovcnt) {
-        return readv(fd,iov,iovcnt);
+    static void ShutdownWrite(int fd) {
+        if (shutdown(fd, SHUT_WR) < 0) {
+            LOG_FATAL("sockets::shutdownWrite");
+        }
     }
 
-    ssize_t Write(int fd, const void *buf, size_t size) {
-        return write(fd,buf,size);
+    static ssize_t Readv(int fd, const iovec *iov, int iovcnt) {
+        return readv(fd, iov, iovcnt);
     }
-}
 
-#endif //CMFNETLIB_SOCKETOPS_HPP
+    static ssize_t Write(int fd, const void *buf, size_t size) {
+        return write(fd, buf, size);
+    }
+};

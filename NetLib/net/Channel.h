@@ -8,19 +8,20 @@
 #include <memory>
 #include <functional>
 #include <sys/epoll.h>
-#include "NetLib/base/noncopyable.h"
 #include "NetLib/base/Timestamp.hpp"
 #include "NetLib/log/Log.hpp"
+
 
 /**
  * Channel(事件分发器),只属于一个EventLoop,Channel类中保存着IO事件的类型以及对应的回调函数,每个channel只负责一个文件描述符
  */
+class EventLoop;
 
 class Channel : private noncopyable {
 public:
     using ptr = std::shared_ptr<Channel>;
     using EventCallback = std::function<void()>;    //事件回调
-    using ReadEventCallback = std::function<void(Timestamp::ptr)>;//读事件回调
+    using ReadEventCallback = std::function<void(Timestamp)>;//读事件回调
 
 
     Channel(EventLoop *loop, int fd) : _loop(loop), _fd(fd), _events(0), _revents(0), _index(-1), _tied(false) {
@@ -104,7 +105,7 @@ public:
      * 防止当channel被手动remove掉，channel还在执行回调操作
      * @param obj
      */
-    void Tie(std::shared_ptr<void> &obj) {
+    void Tie(const std::shared_ptr<void> &obj) {
         this->_tie = obj;
         this->_tied = true;
     }
@@ -113,7 +114,7 @@ public:
      * 处理事件
      * @param receiveTime
      */
-    void HandleEvent(Timestamp::ptr receiveTime) {
+    void HandleEvent(Timestamp receiveTime) {
         if (this->_tied) {
             std::shared_ptr<void> guard = this->_tie.lock();
             if (guard) {
@@ -136,7 +137,7 @@ private:
      * EPOLLET:表示对应的文件描述符有事件发生；
      * @param receiveTime
      */
-    void HandleEventWithGuard(Timestamp::ptr receiveTime) {
+    void HandleEventWithGuard(Timestamp receiveTime) {
         LOG_INFO("channel handleEvent revents:%d", Revents());
         if ((this->_revents & EPOLLHUP) && !(this->_revents & EPOLLIN)) {
             if (this->_closeCallback) {

@@ -3,6 +3,8 @@
 //
 
 #include "Channel.h"
+#include "EventLoop.h"
+
 void Channel::EnableReading() {
     _events |= ReadEvent;
     _loop->UpdateChannel(this);

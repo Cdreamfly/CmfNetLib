@@ -5,10 +5,14 @@
 #ifndef CMFNETLIB_EVENTLOOP_CPP
 #define CMFNETLIB_EVENTLOOP_CPP
 
-#include<memory>
+#include <memory>
 #include <functional>
-#include "NetLib/base/noncopyable.h"
+#include <mutex>
+#include <atomic>
+#include <thread>
+#include <vector>
 #include "NetLib/base/Timestamp.hpp"
+#include "NetLib/base/noncopyable.h"
 
 class Channel;
 
@@ -27,7 +31,7 @@ public:
 
     void Quit();
 
-    Timestamp PollReturnTime() const;
+    Timestamp PollReturnTime() const { return _pollReturnTime; }
 
     /**
      * 在当前loop中执行cb
@@ -68,9 +72,9 @@ private:
 private:
     std::atomic_bool _looping;
     std::atomic_bool _quit; //标识退出loop循环
-    const std::thread::id  _threadId;  //记录当前loop所在线程的id
+    const std::thread::id _threadId;  //记录当前loop所在线程的id
     int _wakeupFd;  //linux内核的eventfd创建出来的
-    Timestamp::ptr _pollReturnTime; //poller返回发生事件的channels的时间点
+    Timestamp _pollReturnTime; //poller返回发生事件的channels的时间点
     std::unique_ptr<Poller> _poller;//eventloop所管理的poller
     std::unique_ptr<Channel> _wakeupChannel;//包括wakeupFd和感兴趣的事件
     ChannelList _activeChannels;    //eventloop所管理的channel

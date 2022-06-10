@@ -5,7 +5,6 @@
 #include "EventLoop.h"
 #include "Channel.h"
 #include "Poller.h"
-#include "NetLib/log/Log.hpp"
 #include <sys/eventfd.h>
 #include <unistd.h>
 
@@ -54,7 +53,7 @@ void EventLoop::Loop() {
     LOG_INFO("EventLoop %p Start Looping!", this);
     while (!_quit) {
         _activeChannels.clear();
-        _pollReturnTime = _poller->Poll(PollTimeMs, _activeChannels);
+        _pollReturnTime = _poller->Poll(PollTimeMs, &_activeChannels);
         for (Channel *channel: _activeChannels) {
             //Poller监听哪些channel发生事件了，然后上报给EventLoop，通知channel处理相应的事件
             channel->HandleEvent((_pollReturnTime));

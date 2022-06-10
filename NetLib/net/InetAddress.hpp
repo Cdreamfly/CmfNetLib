@@ -7,13 +7,15 @@
 
 #include <arpa/inet.h>
 #include <memory>
-#include <cstring>
+#include <string.h>
 #include "NetLib/base/StringArg.hpp"
 #include "NetLib/base/copyable.h"
 
-class InetAddress :public copyable{
+class InetAddress : public copyable {
 public:
     using ptr = std::shared_ptr<InetAddress>;
+
+    explicit InetAddress() {}
 
     explicit InetAddress(uint16_t port) {
         memset(&_addr, 0, sizeof(_addr));
@@ -51,10 +53,17 @@ public:
         return buf;
     }
 
-    uint16_t GetPort() const {
+    std::string ToIpPort() const {
+        char buf[64] = {0};
+        inet_ntop(AF_INET, &_addr.sin_addr, buf, static_cast<socklen_t>(sizeof(_addr)));
+        snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), ":%u", this->GetPort());
+        return buf;
+    }
 
+    uint16_t GetPort() const {
         return be16toh(_addr.sin_port);
     }
+
 
 private:
     sockaddr_in _addr;
