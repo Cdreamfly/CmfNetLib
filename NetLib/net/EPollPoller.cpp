@@ -61,7 +61,7 @@ Timestamp EPollPoller::Poll(int timeoutMs, ChannelList *activeChannels) {
     int saveErrno = errno;// 全局变量errno，poll可能在多个线程中的eventloop被调用，被读写，所以先用局部变量存起来
     Timestamp now(Timestamp::Now());
     if (saveErrno > 0) {//表示有已经发生相应事件的个数
-        LOG_INFO("%d events happened \n", numEvents);
+        LOG_INFO("%d events happened", numEvents);
         FillActiveChannels(numEvents, activeChannels);
         if (numEvents == _events.size()) {//所有的监听的event都发生事件了,得扩容了
             _events.resize(_events.size() * 2);

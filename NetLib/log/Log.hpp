@@ -39,15 +39,18 @@ public:
     LogEvent(LogLevel level,
              const std::string &fileName,
              const uint32_t line,
-             const std::string &time,
              const std::string &format,
              const Args &...args)
             : _level(level),
               _fileName(fileName),
               _line(line),
-              _time(time),
+              _time(GetCurrentSystemTime()),
               _msg(LogFormat(format, args...)),
               _threadId(std::this_thread::get_id()) {
+    }
+
+    const std::string GetCurrentSystemTime() {
+        return std::move(Timestamp::Now().ToString());
     }
 
     static const char *ToString(LogLevel level) noexcept {
@@ -129,23 +132,6 @@ private:
     LogLevel _level;
 };
 
-/*
- * 日志器
- */
-class Logger : private noncopyable {
-public:
-    using ptr = std::shared_ptr<Logger>;
-
-    static Logger &GetInstance() {
-        static Logger logger;
-        return logger;
-    }
-
-    const std::string GetCurrentSystemTime() {
-        return std::move(Timestamp::Now().ToString());
-    }
-};
-
 class LogAppender {
 public:
     using ptr = std::shared_ptr<LogAppender>;
@@ -214,8 +200,34 @@ private:
 
 };
 
+/*
+ * 日志器
+ */
+class Logger : private noncopyable {
+public:
+    using ptr = std::shared_ptr<Logger>;
+
+    static Logger &GetInstance() {
+        static Logger logger;
+        return logger;
+    }
+
+    LogAppender::ptr StdoutLog() {
+        _logAppender = std::make_shared<StdoutLogAppender>();
+        return _logAppender;
+    }
+
+    LogAppender::ptr FileLog(const std::string path) {
+        _logAppender = std::make_shared<FileLogAppender>(path);
+        return _logAppender;
+    }
+
+private:
+    LogAppender::ptr _logAppender;
+};
+
 #define LOG_BASE(level, fmt, ...) \
-std::make_shared<StdoutLogAppender>()->Log(std::make_shared<LogEvent>(level,__FILE__,__LINE__,Logger::GetInstance().GetCurrentSystemTime(),fmt,##__VA_ARGS__));
+Logger::GetInstance().StdoutLog()->Log(std::make_shared<LogEvent>(level,__FILE__,__LINE__,fmt,##__VA_ARGS__));
 
 #define LOG_DEBUG(fmt, ...) LOG_BASE(LogLevel::DEBUG,fmt,##__VA_ARGS__)
 #define LOG_INFO(fmt, ...)  LOG_BASE(LogLevel::INFO,fmt,##__VA_ARGS__)
