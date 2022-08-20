@@ -10,6 +10,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <string>
 
 class Thread : private noncopyable {
 public:

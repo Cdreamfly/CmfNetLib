@@ -4,6 +4,7 @@
 
 #include "base/Thread.h"
 #include <semaphore.h>
+#include <cstdio>
 
 std::atomic_int Thread::_numCreated(0);
 
