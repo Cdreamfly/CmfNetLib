@@ -79,7 +79,7 @@ private:
 
     void HandleError();
 
-    void SendInLoop(const void *message, size_t len);
+    void SendInLoop(const std::string &msg);
 
     void ShutdownInLoop();
 

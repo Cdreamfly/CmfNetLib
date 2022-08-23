@@ -27,7 +27,7 @@ public:
     }
 
     bool Listening() const {
-        return _listenning;
+        return _listening;
     }
 
     void Listen();
@@ -39,7 +39,7 @@ private:
     Socket _acceptSocket;
     Channel _acceptChannel;
     NewConnectionCallback _newConnectionCallback;
-    bool _listenning;
+    bool _listening;
 };
 
 

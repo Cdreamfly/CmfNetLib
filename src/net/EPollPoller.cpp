@@ -56,7 +56,7 @@ void EPollPoller::UpdateChannel(Channel *channel) {
 }
 
 Timestamp EPollPoller::Poll(int timeoutMs, ChannelList *activeChannels) {
-    LOG_FATAL("fd total count %d", _channels.size());
+    //LOG_FATAL("fd total count %d", _channels.size());
     int numEvents = epoll_wait(_epollFd, &*_events.begin(), static_cast<int>(_events.size()), timeoutMs);
     int saveErrno = errno;// 全局变量errno，poll可能在多个线程中的eventloop被调用，被读写，所以先用局部变量存起来
     Timestamp now(Timestamp::Now());
@@ -67,7 +67,7 @@ Timestamp EPollPoller::Poll(int timeoutMs, ChannelList *activeChannels) {
             _events.resize(_events.size() * 2);
         }
     } else if (numEvents == 0) {//epoll_wait这一轮监听没有事件发生，timeout超时了
-        LOG_DEBUG("%s timeout!", __FUNCTION__);
+        //LOG_DEBUG("%s timeout!", __FUNCTION__);
     } else {
         if (saveErrno != EINTR) {//不等于外部的中断,是由其他错误类型引起的
             errno = saveErrno;//适配,把errno重置成当前loop之前发生的错误的值

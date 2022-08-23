@@ -5,7 +5,7 @@
 #ifndef CMFNETLIB_BUFFER_HPP
 #define CMFNETLIB_BUFFER_HPP
 
-#include "base/copyable.hpp"
+#include "base/noncopyable.hpp"
 #include "SocketOps.hpp"
 #include <memory>
 #include <vector>
@@ -13,7 +13,7 @@
 #include <cstring>
 
 
-class Buffer : public copyable {
+class Buffer : public noncopyable {
 public:
     using ptr = std::shared_ptr<Buffer>;
     //8字节长度（解决粘包问题）
@@ -22,11 +22,9 @@ public:
 
 public:
 
-    Buffer(size_t size = InitialSize) : _buffer(InitialSize + CheapPrepend),
-                                        _readIndex(CheapPrepend),
-                                        _writerIndex(CheapPrepend) {
-
-    }
+    explicit Buffer(size_t size = InitialSize) : _buffer(InitialSize + CheapPrepend),
+                                                 _readIndex(CheapPrepend),
+                                                 _writerIndex(CheapPrepend) {}
 
     //可写入字节数
     size_t WritableBytes() const {
@@ -46,7 +44,7 @@ public:
     //读出字节
     void Retrieve(size_t len) {
         if (len < ReadableBytes()) {
-            _writerIndex += len;
+            _readIndex += len;
         } else {
             RetrieveAll();
         }
@@ -65,7 +63,7 @@ public:
 
     //读出全部字节
     void RetrieveAll() {
-        _writerIndex = _readIndex = CheapPrepend;
+        _readIndex = _writerIndex = CheapPrepend;
     }
 
     //追加数据
@@ -120,17 +118,11 @@ public:
         return n;
     }
 
-    ssize_t WriteFd(int fd, int *savedErrno) {
+    ssize_t WriteFd(int fd, int *savedErrno) const {
         ssize_t len = SocketOps::Write(fd, Peek(), ReadableBytes());
         if (len < 0) {
             *savedErrno = errno;
-            //return len;
         }
-        //把可读出数据全部发送了是不是应该初始化下标，还是更新可读出下表
-        //_readIndex = CheapPrepend;
-        //_writerIndex = CheapPrepend;
-
-        //_readIndex += len;
         return len;
     }
 
@@ -141,10 +133,10 @@ private:
         if (WritableBytes() + PrependableBytes() < len + CheapPrepend) {
             _buffer.resize(_writerIndex + len);
         } else {    //够的话就把首位空间合在一起
-            int readSize = ReadableBytes();
+            size_t readSize = ReadableBytes();
             std::copy(Begin() + _readIndex, Begin() + _writerIndex, Begin() + CheapPrepend);
-            _writerIndex = CheapPrepend;
-            _readIndex = CheapPrepend + readSize;
+            _readIndex = CheapPrepend;
+            _writerIndex = _readIndex + readSize;
         }
     }
 

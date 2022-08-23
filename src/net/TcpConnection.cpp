@@ -33,9 +33,9 @@ TcpConnection::~TcpConnection() {
 void TcpConnection::Send(const std::string &buf) {
     if (_state == Connected) {
         if (_loop->IsInLoopThread()) {//当前loop是不是在对应的线程
-            SendInLoop(buf.c_str(), buf.size());
+            SendInLoop(buf);
         } else {
-            _loop->RunInLoop(std::bind(&TcpConnection::SendInLoop, this, buf.c_str(), buf.size()));
+            _loop->RunInLoop(std::bind(&TcpConnection::SendInLoop, this, buf));
         }
     }
 }
@@ -43,9 +43,9 @@ void TcpConnection::Send(const std::string &buf) {
 /**
  * 发送数据  应用写的快， 而内核发送数据慢， 需要把待发送数据写入缓冲区， 而且设置了水位回调
  */
-void TcpConnection::SendInLoop(const void *message, size_t len) {
+void TcpConnection::SendInLoop(const std::string &msg) {
     ssize_t nwrote = 0;
-    size_t remaining = len;
+    size_t remaining = msg.size();
     bool faultError = false;
     //之前调用过该connection的shutdown，不能再进行发送了
     if (_state == Disconnected) {
@@ -54,20 +54,18 @@ void TcpConnection::SendInLoop(const void *message, size_t len) {
     }
     //表示channel_第一次开始写数据，而且缓冲区没有待发送数据
     if (!_channel->IsWriting() && _outputBuffer.ReadableBytes() == 0) {
-        nwrote = write(_channel->Fd(), message, len);
+        nwrote = ::write(_channel->Fd(), msg.c_str(), msg.size());
         if (nwrote >= 0) {
-            remaining = len - nwrote;
+            remaining = msg.size() - nwrote;
             if (remaining == 0 && _writeCompleteCallback) {
                 //既然在这里数据全部发送完成，就不用再给channel设置epollout事件了
                 _loop->QueueInLoop(std::bind(_writeCompleteCallback, shared_from_this()));
             }
-        } else//nwrote < 0
-        {
+        } else {//nwrote < 0
             nwrote = 0;
             if (errno != EWOULDBLOCK) {
                 LOG_ERROR("TcpConnection::sendInLoop");
-                if (errno == EPIPE || errno == ECONNRESET) // SIGPIPE  RESET
-                {
+                if (errno == EPIPE || errno == ECONNRESET) {// SIGPIPE  RESET
                     faultError = true;
                 }
             }
@@ -84,7 +82,7 @@ void TcpConnection::SendInLoop(const void *message, size_t len) {
             && _highWaterMarkCallback) {
             _loop->QueueInLoop(std::bind(_highWaterMarkCallback, shared_from_this(), oldLen + remaining));
         }
-        _outputBuffer.Append((char *) message + nwrote, remaining);
+        _outputBuffer.Append(msg.c_str() + nwrote, remaining);
         if (!_channel->IsWriting()) {
             _channel->EnableWriting();//这里一定要注册channel的写事件，否则poller不会给channel通知epollout
         }

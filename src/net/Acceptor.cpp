@@ -7,7 +7,7 @@
 
 Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reusePort) :
         _loop(loop),
-        _listenning(false),
+        _listening(false),
         _acceptSocket(SocketOps::CreateNonblockingSocket(listenAddr.Family())),
         _acceptChannel(loop, _acceptSocket.GetFd()) {
     _acceptSocket.SetReuseAddr(true);//设置端口可重用
@@ -22,7 +22,7 @@ Acceptor::~Acceptor() {
 }
 
 void Acceptor::Listen() {
-    _listenning = true;
+    _listening = true;
     _acceptSocket.Listen();
     _acceptChannel.EnableReading();//注册可读事件
 }
