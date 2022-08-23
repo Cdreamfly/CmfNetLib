@@ -2,12 +2,12 @@
 // Created by Cmf on 2022/6/9.
 //
 
-#ifndef CMFNETLIB_TCPCONNECTION_H
-#define CMFNETLIB_TCPCONNECTION_H
+#ifndef CMFNETLIB_TCPCONNECTION_HPP
+#define CMFNETLIB_TCPCONNECTION_HPP
 
-#include "base/noncopyable.h"
+#include "base/noncopyable.hpp"
 #include "InetAddress.hpp"
-#include "Callbacks.h"
+#include "Callbacks.hpp"
 #include "Buffer.hpp"
 
 #include <atomic>
@@ -32,7 +32,10 @@ public:
 
     void SetWriteCompleteCallback(const WriteCompleteCallback &cb) { _writeCompleteCallback = cb; }
 
-    void SetHighWaterMarkCallback(const HighWaterMarkCallback &cb) { _highWaterMarkCallback = cb; }
+    void SetHighWaterMarkCallback(const HighWaterMarkCallback &cb, size_t highWaterMark) {
+        _highWaterMarkCallback = cb;
+        _highWaterMark = highWaterMark;
+    }
 
     void SetCloseCallback(const ConnectionCallback &cb) { _closeCallback = cb; }
 
@@ -104,4 +107,4 @@ private:
 };
 
 
-#endif //CMFNETLIB_TCPCONNECTION_H
+#endif //CMFNETLIB_TCPCONNECTION_HPP

@@ -2,10 +2,10 @@
 // Created by Cmf on 2022/6/4.
 //
 
-#ifndef CMFNETLIB_EPOLLPOLLER_H
-#define CMFNETLIB_EPOLLPOLLER_H
+#ifndef CMFNETLIB_EPOLLPOLLER_HPP
+#define CMFNETLIB_EPOLLPOLLER_HPP
 
-#include "Poller.h"
+#include "Poller.hpp"
 
 struct epoll_event;
 
@@ -38,4 +38,4 @@ private:
 };
 
 
-#endif //CMFNETLIB_EPOLLPOLLER_H
+#endif //CMFNETLIB_EPOLLPOLLER_HPP

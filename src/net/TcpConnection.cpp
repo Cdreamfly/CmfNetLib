@@ -2,10 +2,10 @@
 // Created by Cmf on 2022/6/9.
 //
 
-#include "net/TcpConnection.h"
-#include "net/EventLoop.h"
+#include "net/TcpConnection.hpp"
+#include "net/EventLoop.hpp"
 #include "net/Socket.hpp"
-#include "net/Channel.h"
+#include "net/Channel.hpp"
 
 TcpConnection::TcpConnection(EventLoop *loop, const std::string &name, int sockfd, const InetAddress &localAddr,
                              const InetAddress &peerAddr) :
@@ -123,8 +123,9 @@ void TcpConnection::HandleRead(Timestamp receiveTime) {
     int savedErrno = 0;
     ssize_t n = _inputBuffer.ReadFd(_channel->Fd(), &savedErrno);
     //已建立连接的用户，有可读事件发生了，调用用户传入的回调操作onMessage
-    _messageCallback(shared_from_this(), &_inputBuffer, receiveTime);
-    if (n == 0) {
+    if (n > 0) {
+        _messageCallback(shared_from_this(), &_inputBuffer, receiveTime);
+    } else if (n == 0) {
         this->HandleClose();
     } else {
         errno = savedErrno;

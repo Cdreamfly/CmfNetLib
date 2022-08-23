@@ -2,8 +2,8 @@
 // Created by Cmf on 2022/6/9.
 //
 
-#ifndef CMFNETLIB_CALLBACKS_H
-#define CMFNETLIB_CALLBACKS_H
+#ifndef CMFNETLIB_CALLBACKS_HPP
+#define CMFNETLIB_CALLBACKS_HPP
 
 #include <functional>
 #include <memory>
@@ -21,4 +21,4 @@ using WriteCompleteCallback = std::function<void(const TcpConnectionPtr &)>;
 using MessageCallback = std::function<void(const TcpConnectionPtr &, Buffer *, Timestamp)>;
 using HighWaterMarkCallback = std::function<void(const TcpConnectionPtr &, size_t)>;
 
-#endif //CMFNETLIB_CALLBACKS_H
+#endif //CMFNETLIB_CALLBACKS_HPP

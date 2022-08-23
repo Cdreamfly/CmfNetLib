@@ -2,11 +2,11 @@
 // Created by Cmf on 2022/6/8.
 //
 
-#ifndef CMFNETLIB_EVENTLOOPTHREAD_H
-#define CMFNETLIB_EVENTLOOPTHREAD_H
+#ifndef CMFNETLIB_EVENTLOOPTHREAD_HPP
+#define CMFNETLIB_EVENTLOOPTHREAD_HPP
 
-#include "base/noncopyable.h"
-#include "base/Thread.h"
+#include "base/noncopyable.hpp"
+#include "base/Thread.hpp"
 #include <functional>
 #include <condition_variable>
 
@@ -34,4 +34,4 @@ private:
 };
 
 
-#endif //CMFNETLIB_EVENTLOOPTHREAD_H
+#endif //CMFNETLIB_EVENTLOOPTHREAD_HPP

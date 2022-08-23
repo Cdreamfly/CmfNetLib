@@ -2,8 +2,8 @@
 // Created by Cmf on 2022/6/8.
 //
 
-#include "net/EventLoopThread.h"
-#include "net/EventLoop.h"
+#include "net/EventLoopThread.hpp"
+#include "net/EventLoop.hpp"
 
 EventLoopThread::EventLoopThread(const ThreadInitCallback &cb, const std::string &name) :
         _loop(nullptr),

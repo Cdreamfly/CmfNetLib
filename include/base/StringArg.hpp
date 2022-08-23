@@ -9,13 +9,9 @@
 
 class StringArg {
 public:
-    StringArg(const char *str) : _str(str) {
+    StringArg(const char *str) : _str(str) {}
 
-    }
-
-    StringArg(const std::string &str) : _str(str.c_str()) {
-
-    }
+    StringArg(const std::string &str) : _str(str.c_str()) {}
 
     const char *c_str() {
         return _str;

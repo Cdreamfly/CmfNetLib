@@ -2,8 +2,8 @@
 // Created by Cmf on 2022/6/4.
 //
 
-#include "net/EPollPoller.h"
-#include "net/Channel.h"
+#include "net/EPollPoller.hpp"
+#include "net/Channel.hpp"
 #include <sys/epoll.h>
 #include <unistd.h>
 #include <string.h>
@@ -42,8 +42,8 @@ void EPollPoller::UpdateChannel(Channel *channel) {
             int fd = channel->Fd();
             _channels[fd] = channel;
         }
-        this->Update(EPOLL_CTL_ADD, channel);   //添加一个channel到epoll
         channel->SetIndex(Added);
+        this->Update(EPOLL_CTL_ADD, channel);   //添加一个channel到epoll
     } else {    //如果已经添加
         int fd = channel->Fd();
         if (channel->IsNoneEvent()) {   //如果对任何事件都不感兴趣
@@ -60,7 +60,7 @@ Timestamp EPollPoller::Poll(int timeoutMs, ChannelList *activeChannels) {
     int numEvents = epoll_wait(_epollFd, &*_events.begin(), static_cast<int>(_events.size()), timeoutMs);
     int saveErrno = errno;// 全局变量errno，poll可能在多个线程中的eventloop被调用，被读写，所以先用局部变量存起来
     Timestamp now(Timestamp::Now());
-    if (saveErrno > 0) {//表示有已经发生相应事件的个数
+    if (numEvents > 0) {//表示有已经发生相应事件的个数
         LOG_INFO("%d events happened", numEvents);
         FillActiveChannels(numEvents, activeChannels);
         if (numEvents == _events.size()) {//所有的监听的event都发生事件了,得扩容了

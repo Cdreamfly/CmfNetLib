@@ -2,12 +2,12 @@
 // Created by Cmf on 2022/6/9.
 //
 
-#ifndef CMFNETLIB_ACCEPTOR_H
-#define CMFNETLIB_ACCEPTOR_H
+#ifndef CMFNETLIB_ACCEPTOR_HPP
+#define CMFNETLIB_ACCEPTOR_HPP
 
-#include "base/noncopyable.h"
+#include "base/noncopyable.hpp"
 #include "Socket.hpp"
-#include "Channel.h"
+#include "Channel.hpp"
 #include <functional>
 
 class InetAddress;
@@ -18,7 +18,7 @@ class Acceptor : private noncopyable {
 public:
     using NewConnectionCallback = std::function<void(int, const InetAddress &)>;
 
-    Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reuseport);
+    Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reusePort);
 
     ~Acceptor();
 
@@ -26,7 +26,7 @@ public:
         _newConnectionCallback = cb;
     }
 
-    bool Listenning() const {
+    bool Listening() const {
         return _listenning;
     }
 
@@ -43,4 +43,4 @@ private:
 };
 
 
-#endif //CMFNETLIB_ACCEPTOR_H
+#endif //CMFNETLIB_ACCEPTOR_HPP

@@ -5,8 +5,8 @@
 #ifndef CMFNETLIB_SOCKET_HPP
 #define CMFNETLIB_SOCKET_HPP
 
-#include "base/noncopyable.h"
-#include "net/SocketOps.h"
+#include "base/noncopyable.hpp"
+#include "net/SocketOps.hpp"
 #include "net/InetAddress.hpp"
 
 #include <netinet/tcp.h>
@@ -19,7 +19,7 @@ public:
     explicit Socket(int fd) : _fd(fd) {}
 
     ~Socket() noexcept {
-        Sockets::Close(_fd);
+        SocketOps::Close(_fd);
     }
 
     int GetFd() const {
@@ -27,21 +27,21 @@ public:
     }
 
     void Bind(const InetAddress &addr) const {
-        Sockets::Bind(_fd, addr.GetSockAddr());
+        SocketOps::Bind(_fd, addr.GetSockAddr());
     }
 
     void Listen() const {
-        Sockets::Listen(_fd);
+        SocketOps::Listen(_fd);
     }
 
     void ShutdownWrite() {
-        Sockets::ShutdownWrite(_fd);
+        SocketOps::ShutdownWrite(_fd);
     }
 
     int Accept(InetAddress *peeraddr) {
         sockaddr_in addr;
         memset(&addr, 0, sizeof(addr));
-        int fd = Sockets::Accept(_fd, &addr);
+        int fd = SocketOps::Accept(_fd, &addr);
         if (fd >= 0) {
             peeraddr->SetSockAddr(addr);
         }

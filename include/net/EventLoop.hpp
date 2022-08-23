@@ -12,7 +12,7 @@
 #include <thread>
 #include <vector>
 #include "base/Timestamp.hpp"
-#include "base/noncopyable.h"
+#include "base/noncopyable.hpp"
 
 class Channel;
 
@@ -54,7 +54,7 @@ public:
 
     void RemoveChannel(Channel *channel);
 
-    void HasChannel(Channel *channel);
+    bool HasChannel(Channel *channel);
 
     /**
      * 判断EventLoop对象是否在自己的线程里面

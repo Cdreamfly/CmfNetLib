@@ -2,9 +2,9 @@
 // Created by Cmf on 2022/6/7.
 //
 
-#include "net/EventLoop.h"
-#include "net/Channel.h"
-#include "net/Poller.h"
+#include "net/EventLoop.hpp"
+#include "net/Channel.hpp"
+#include "net/Poller.hpp"
 #include <sys/eventfd.h>
 #include <unistd.h>
 
@@ -102,7 +102,7 @@ void EventLoop::HandleRead() {
 }
 
 void EventLoop::WakeUp() {
-    uint64_t one;
+    uint64_t one = 1;
     ssize_t n = write(_wakeupFd, &one, sizeof(one));
     if (n != sizeof(one)) {
         LOG_ERROR("EventLoop::wakeup() writes % lu bytes instead of 8", n);
@@ -117,8 +117,8 @@ void EventLoop::RemoveChannel(Channel *channel) {
     this->_poller->RemoveChannel(channel);
 }
 
-void EventLoop::HasChannel(Channel *channel) {
-    this->_poller->HasChannel(channel);
+bool EventLoop::HasChannel(Channel *channel) {
+    return this->_poller->HasChannel(channel);
 }
 
 void EventLoop::DoPendingFunctors() {

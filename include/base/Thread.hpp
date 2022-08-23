@@ -2,10 +2,10 @@
 // Created by Cmf on 2022/6/8.
 //
 
-#ifndef CMFNETLIB_THREAD_H
-#define CMFNETLIB_THREAD_H
+#ifndef CMFNETLIB_THREAD_HPP
+#define CMFNETLIB_THREAD_HPP
 
-#include "base/noncopyable.h"
+#include "base/noncopyable.hpp"
 #include <functional>
 #include <memory>
 #include <thread>
@@ -52,4 +52,4 @@ private:
 };
 
 
-#endif //CMFNETLIB_THREAD_H
+#endif //CMFNETLIB_THREAD_HPP

@@ -2,18 +2,18 @@
 // Created by Cmf on 2022/6/2.
 //
 
-#ifndef CMFNETLIB_TCPSERVER_H
-#define CMFNETLIB_TCPSERVER_H
+#ifndef CMFNETLIB_TCPSERVER_HPP
+#define CMFNETLIB_TCPSERVER_HPP
 
-#include "base/noncopyable.h"
+#include "base/noncopyable.hpp"
 #include "base/Timestamp.hpp"
-#include "Acceptor.h"
-#include "Callbacks.h"
-#include "EventLoop.h"
+#include "Acceptor.hpp"
+#include "Callbacks.hpp"
+#include "EventLoop.hpp"
 #include "Buffer.hpp"
 #include "InetAddress.hpp"
-#include "TcpConnection.h"
-#include "EventLoopThreadPool.h"
+#include "TcpConnection.hpp"
+#include "EventLoopThreadPool.hpp"
 
 #include <functional>
 #include <memory>
@@ -32,7 +32,7 @@ public:
 
     ~TcpServer();
 
-    void SetThreadInitcallback(const ThreadInitCallback &cb) {_threadInitCallback = cb;}
+    void SetThreadInitCallback(const ThreadInitCallback &cb) {_threadInitCallback = cb;}
 
     void SetConnectionCallback(const ConnectionCallback &cb) { _connectionCallback = cb; }
 
@@ -72,4 +72,4 @@ private:
     ConnectionMap _connections;//保存所有的连接
 };
 
-#endif //CMFNETLIB_TCPSERVER_H
+#endif //CMFNETLIB_TCPSERVER_HPP

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "base/noncopyable.h"
+#include "base/noncopyable.hpp"
 #include "base/Timestamp.hpp"
 #include <memory>
 #include <chrono>

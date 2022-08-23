@@ -5,8 +5,8 @@
 #ifndef CMFNETLIB_BUFFER_HPP
 #define CMFNETLIB_BUFFER_HPP
 
-#include "base/copyable.h"
-#include "SocketOps.h"
+#include "base/copyable.hpp"
+#include "SocketOps.hpp"
 #include <memory>
 #include <vector>
 #include <atomic>
@@ -22,7 +22,7 @@ public:
 
 public:
 
-    Buffer(size_t size = InitialSize) : _buffer(size + CheapPrepend),
+    Buffer(size_t size = InitialSize) : _buffer(InitialSize + CheapPrepend),
                                         _readIndex(CheapPrepend),
                                         _writerIndex(CheapPrepend) {
 
@@ -87,15 +87,15 @@ public:
 
     //返回可写入数据段的首位指针
     char *BeginWrite() {
-        return &*_buffer.begin() + _writerIndex;
+        return Begin() + _writerIndex;
     }
 
     const char *BeginWrite() const {
-        return &*_buffer.begin() + _writerIndex;
+        return Begin() + _writerIndex;
     }
 
     const char *Peek() const {
-        return &*_buffer.begin() + _readIndex;
+        return Begin() + _readIndex;
     }
 
     ssize_t ReadFd(int fd, int *savedErrno) {
@@ -108,7 +108,7 @@ public:
         vec[1].iov_len = sizeof(extrabuf);
         //iovcnt:vec数组的长度,先填充vec[0],填满了才填vec[1]
         const int iovcnt = writable < sizeof(extrabuf) ? 2 : 1;
-        const ssize_t n = Sockets::Readv(fd, vec, iovcnt);
+        const ssize_t n = SocketOps::Readv(fd, vec, iovcnt);
         if (n < 0) {
             *savedErrno = errno;
         } else if (n <= writable) {  //如果读取的数据相等或比可写入空间还小
@@ -121,7 +121,7 @@ public:
     }
 
     ssize_t WriteFd(int fd, int *savedErrno) {
-        ssize_t len = Sockets::Write(fd, Peek(), ReadableBytes());
+        ssize_t len = SocketOps::Write(fd, Peek(), ReadableBytes());
         if (len < 0) {
             *savedErrno = errno;
             //return len;

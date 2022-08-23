@@ -2,13 +2,13 @@
 // Created by Cmf on 2022/6/9.
 //
 
-#include "net/Acceptor.h"
-#include "net/SocketOps.h"
+#include "net/Acceptor.hpp"
+#include "net/SocketOps.hpp"
 
-Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reuseport) :
+Acceptor::Acceptor(EventLoop *loop, const InetAddress &listenAddr, bool reusePort) :
         _loop(loop),
         _listenning(false),
-        _acceptSocket(Sockets::CreateNonblockingSocket()),
+        _acceptSocket(SocketOps::CreateNonblockingSocket(listenAddr.Family())),
         _acceptChannel(loop, _acceptSocket.GetFd()) {
     _acceptSocket.SetReuseAddr(true);//设置端口可重用
     _acceptSocket.SetReusePort(true); //设置地址可重用
@@ -34,7 +34,7 @@ void Acceptor::HandleRead() {
         if (_newConnectionCallback) {
             _newConnectionCallback(connfd, peerAddr);
         } else {
-            close(connfd);
+            ::close(connfd);
         }
     } else {
         LOG_ERROR("%s:%s:%d accept err:%d", __FILE__, __FUNCTION__, __LINE__, errno);

@@ -2,8 +2,8 @@
 // Created by Cmf on 2022/6/2.
 //
 
-#ifndef CMFNETLIB_CHANNEL_H
-#define CMFNETLIB_CHANNEL_H
+#ifndef CMFNETLIB_CHANNEL_HPP
+#define CMFNETLIB_CHANNEL_HPP
 
 #include <memory>
 #include <functional>
@@ -182,4 +182,4 @@ private:
     EventCallback _errorCallback;   //错误事件回调
 };
 
-#endif //CMFNETLIB_CHANNEL_H
+#endif //CMFNETLIB_CHANNEL_HPP

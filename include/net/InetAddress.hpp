@@ -9,18 +9,18 @@
 #include <memory>
 #include <string.h>
 #include "base/StringArg.hpp"
-#include "base/copyable.h"
+#include "base/copyable.hpp"
 
 class InetAddress : public copyable {
 public:
     using ptr = std::shared_ptr<InetAddress>;
 
-    explicit InetAddress() {}
+    explicit InetAddress() = default;
 
-    explicit InetAddress(uint16_t port) {
+    explicit InetAddress(uint16_t port,StringArg ip = "127.0.0.1") {
         memset(&_addr, 0, sizeof(_addr));
         _addr.sin_family = AF_INET;
-        _addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        _addr.sin_addr.s_addr = inet_addr(ip.c_str());
         _addr.sin_port = htons(port);
     }
 
