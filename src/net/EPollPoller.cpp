@@ -93,7 +93,7 @@ void EPollPoller::Update(int operation, Channel *channel) {
     event.events = channel->Events();
     event.data.fd = fd;
     event.data.ptr = channel;
-    if (epoll_ctl(_epollFd, operation, fd, &event) < 0) {
+    if (::epoll_ctl(_epollFd, operation, fd, &event) < 0) {
         if (operation == EPOLL_CTL_DEL) {
             LOG_ERROR("epoll_ctl del error:%d", errno);
         } else {
