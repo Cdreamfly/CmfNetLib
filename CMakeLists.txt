@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.22)
 project(muduo)
 
 set(CMAKE_CXX_STANDARD 14)
+set(LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR/lib})
 
-add_definitions("-g -O2 -Wall -fPIC")
+add_definitions("-g -O2 -Wall -fPIC -std=c++14")
 
 file(GLOB SRC_FILES 
     "${PROJECT_SOURCE_DIR}/src/*")
