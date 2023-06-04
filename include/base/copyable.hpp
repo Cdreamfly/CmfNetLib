@@ -1,11 +1,10 @@
 #pragma once
 
-namespace muduo
-{
-    class copyable
-    {
+namespace cm {
+    class copyable {
     protected:
         copyable() = default;
+
         ~copyable() = default;
     };
 }
