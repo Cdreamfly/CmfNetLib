@@ -1,6 +1,4 @@
-#pragma once
-
-#include "base/timestamp.h"
+#include "base/Timestamp.h"
 
 #include <chrono>
 
