@@ -11,7 +11,7 @@ namespace cm {
         public:
             explicit InetAddress(const sockaddr_in &addr);
 
-            explicit InetAddress(const std::string &ip = "127.0.0.1", uint16_t port = 0);
+            explicit InetAddress(const std::string &ip = "127.0.0.1", uint16_t port = 80);
 
             std::string ip()const;
 
