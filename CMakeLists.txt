@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(cm)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
@@ -16,8 +16,8 @@ file(GLOB SRC_FILES
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(cm STATIC ${SRC_FILES})
+#add_library(cm STATIC ${SRC_FILES})
 
-#add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
+add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
 
 find_package(Threads)

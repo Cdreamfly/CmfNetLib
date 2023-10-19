@@ -1,7 +1,7 @@
 #pragma once
 
-#include "base/noncopyable.hpp"
-#include "base/Timestamp.h"
+#include "base/NonCopyable.hpp"
+#include "base/Timestamp.hpp"
 
 #include <memory>
 #include <thread>
@@ -59,22 +59,6 @@ namespace cm {
             std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
             std::snprintf(buf.get(), size, format.c_str(), args ...);
             return std::string{buf.get(), buf.get() + size - 1};
-        }
-
-        static LogLevel FromString(const std::string &str) noexcept {
-            if (str == "DEBUG") {
-                return LogLevel::DEBUG;
-            } else if (str == "INFO") {
-                return LogLevel::INFO;
-            } else if (str == "WARN") {
-                return LogLevel::WARN;
-            } else if (str == "ERROR") {
-                return LogLevel::ERROR;
-            } else if (str == "FATAL") {
-                return LogLevel::FATAL;
-            } else {
-                return LogLevel::NONE;
-            }
         }
 
         LogLevel GetLevel() const {
@@ -200,7 +184,7 @@ namespace cm {
 /*
  * 日志器
  */
-    class Logger : private cm::noncopyable {
+    class Logger : private cm::NonCopyable {
     public:
         using ptr = std::shared_ptr<Logger>;
 
