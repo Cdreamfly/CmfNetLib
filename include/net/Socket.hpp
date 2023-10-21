@@ -14,7 +14,7 @@ namespace cm {
 
 			int fd() const { return sockFd_; }
 
-			void bindAddress(const InetAddress &addr) { bindOrDie(sockFd_, addr.getSocketAddr()); }
+			void bindAddress(const InetAddress &addr) const { bindOrDie(sockFd_, addr.getSocketAddr()); }
 
 		private:
 			const int sockFd_;
