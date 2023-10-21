@@ -5,7 +5,6 @@
 #include "net/InetAddress.hpp"
 
 #include <netinet/tcp.h>
-#include <cstring>
 
 namespace cm {
 	namespace net {
