@@ -2,18 +2,18 @@
 
 #include <functional>
 #include <memory>
-#include <sys/epoll.h>
 #include <sys/poll.h>
 
+#include "base/Timestamp.hpp"
 #include "base/NonCopyable.hpp"
 
 /**
  * Channel理解为通道，封装了sockFd和其感兴趣的event，如EPOLLIN,EPOLLOUT事件，还绑定了Poller返回的具体事件
  */
-class EventLoop;
 
-class Timestamp;
 namespace cm::net {
+	class EventLoop;
+
 	class Channel : private NonCopyable {
 	public:
 		using EventCallback = std::function<void()>;
@@ -28,17 +28,7 @@ namespace cm::net {
 		 * 解决办法是提供Channel::tie(const boost::shared_ptr<void>&)这个函数，用于延长某些对象（可以是Channel对象，也可以是其owner对象）的生命期，使之长过Channel::handleEvent()函数。
 		 * @param receiveTime
 		 */
-		void handleEvent(const Timestamp &receiveTime) {
-			if (tied_) {
-				//如果当前 weak_ptr 已经过期，则该函数会返回一个空的 shared_ptr 指针；反之，该函数返回一个和当前 weak_ptr 指向相同的 shared_ptr 指针。
-				std::shared_ptr<void> guard = tie_.lock();
-				if (guard) {
-					handleEventWithGuard(receiveTime);
-				}
-			} else {
-				handleEventWithGuard(receiveTime);
-			}
-		}
+		void handleEvent(const Timestamp &receiveTime);
 
 		void setReadCallback(const ReadEventCallback &cb) { readCallback_ = cb; }
 
@@ -48,11 +38,11 @@ namespace cm::net {
 
 		void setErrorCallback(const EventCallback &cb) { errorCallback_ = cb; }
 
-		bool isNoneEvent() const { return events_ == kNoneEvent; }
+		[[nodiscard]] bool isNoneEvent() const { return events_ == kNoneEvent; }
 
-		bool isWriting() const { return events_ == kWriteEvent; }
+		[[nodiscard]] bool isWriting() const { return events_ == kWriteEvent; }
 
-		bool isReading() const { return events_ == kReadEvent; }
+		[[nodiscard]] bool isReading() const { return events_ == kReadEvent; }
 
 		void enableReading() {
 			events_ |= kReadEvent;
@@ -88,17 +78,17 @@ namespace cm::net {
 			tied_ = true;
 		}
 
-		int fd() const { return fd_; }
+		[[nodiscard]] int fd() const { return fd_; }
 
-		int events() const { return events_; }
+		[[nodiscard]] int events() const { return events_; }
 
 		void setReceivedEvents(const int receivedEvent) { receivedEvents = receivedEvent; }
 
-		int index() const { return index_; }
+		[[nodiscard]] int index() const { return index_; }
 
 		void setIndex(const int index) { index_ = index; }
 
-		EventLoop *ownerLoop() const { return loop_; }
+		[[nodiscard]] EventLoop *ownerLoop() const { return loop_; }
 
 		void remove();
 

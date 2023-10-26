@@ -1,8 +1,9 @@
 #pragma once
 
 #include <arpa/inet.h>
+#include <netinet/tcp.h>
 #include <unistd.h>
-#include <sys/socket.h>
+
 #include "base/Log.hpp"
 
 namespace cm::net::sockets {
@@ -80,5 +81,28 @@ namespace cm::net::sockets {
 
 	ssize_t write(const int fd, void *buf, size_t count) {
 		return ::write(fd, buf, count);
+	}
+
+	void setTcpNoDelay(const int fd, const bool on) {
+		int opt = on ? 1 : 0;
+		::setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, static_cast<socklen_t>(sizeof(opt)));
+	}
+
+	void setReuseAddr(const int fd, const bool on) {
+		int opt = on ? 1 : 0;
+		::setsockopt(fd, IPPROTO_TCP, SO_REUSEADDR, &opt, static_cast<socklen_t>(sizeof(opt)));
+	}
+
+	void setReusePort(const int fd, const bool on) {
+		int opt = on ? 1 : 0;
+		int ret = ::setsockopt(fd, IPPROTO_TCP, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof(opt)));
+		if (ret < 0 && on) {
+			LOG_FATAL("SO_REUSEPORT failed.");
+		}
+	}
+
+	void setKeepAlive(const int fd, const bool on) {
+		int opt = on ? 1 : 0;
+		::setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof(opt)));
 	}
 }

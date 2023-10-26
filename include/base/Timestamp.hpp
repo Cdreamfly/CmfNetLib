@@ -12,9 +12,9 @@ namespace cm {
 
 		static Timestamp now();
 
-		std::string toString() const;
+		[[nodiscard]] std::string toString() const;
 
-		int64_t microSecondsSinceEpoch() const { return microSecondsSinceEpoch_; }
+		[[nodiscard]] int64_t microSecondsSinceEpoch() const { return microSecondsSinceEpoch_; }
 
 		bool operator<(const Timestamp &rhs) const {
 			return this->microSecondsSinceEpoch() < rhs.microSecondsSinceEpoch();

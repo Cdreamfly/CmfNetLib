@@ -16,15 +16,15 @@ namespace cm::net {
 
 		explicit InetAddress(const sockaddr_in6 &addr) : addr6_(addr), ipv6_(true) {}
 
-		std::string toIp() const;
+		[[nodiscard]] std::string toIp() const;
 
-		uint16_t toPort() const { return ipv6_ ? be16toh(addr6_.sin6_port) : be16toh(addr_.sin_port); }
+		[[nodiscard]] uint16_t toPort() const { return ipv6_ ? be16toh(addr6_.sin6_port) : be16toh(addr_.sin_port); }
 
-		std::string toIpPort() const { return this->toIp() + ":" + std::to_string(this->toPort()); }
+		[[nodiscard]] std::string toIpPort() const { return this->toIp() + ":" + std::to_string(this->toPort()); }
 
-		sa_family_t family() const { return ipv6_ ? addr6_.sin6_family : addr_.sin_family; }
+		[[nodiscard]] sa_family_t family() const { return ipv6_ ? addr6_.sin6_family : addr_.sin_family; }
 
-		const sockaddr *getSocketAddr() const {
+		[[nodiscard]] const sockaddr *getSocketAddr() const {
 			return ipv6_ ? (const sockaddr *) &addr6_ : (const sockaddr *) &addr_;
 		}
 
