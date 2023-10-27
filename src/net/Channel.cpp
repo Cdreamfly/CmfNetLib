@@ -1,11 +1,12 @@
 #include "net/Channel.hpp"
+#include "net/EventLoop.hpp"
 
 void cm::net::Channel::update() {
-
+	loop_->updateChannel(this);
 }
 
 void cm::net::Channel::remove() {
-
+	loop_->removeChannel(this);
 }
 
 void cm::net::Channel::handleEvent(const cm::Timestamp &receiveTime) {

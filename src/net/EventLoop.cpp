@@ -47,9 +47,9 @@ void cm::net::EventLoop::loop() {
 		activeChannels_.clear();
 		//监听两类fd， client fd wake fd
 		pollReturnTime_ = poller_->poll(kPollTimeMs, &activeChannels_);
-		for (auto i: activeChannels_) {
+		for (Channel *channel: activeChannels_) {
 			//Poller监听哪些channel发生事件了，然后上报给EventLoop，通知channel处理相应的事件
-			i->handleEvent(pollReturnTime_);
+			channel->handleEvent(pollReturnTime_);
 		}
 		/**
 		 * 执行当前EventLoop事件循环需要处理的回调操作
@@ -69,23 +69,37 @@ void cm::net::EventLoop::quit() {
 }
 
 void cm::net::EventLoop::runInLoop(const cm::net::EventLoop::Functor &cb) {
-
+	if (isInLoopThread()) {
+		cb();
+	} else {
+		queueInLoop(cb);
+	}
 }
 
 void cm::net::EventLoop::queueInLoop(const cm::net::EventLoop::Functor &cb) {
-
+	{
+		std::unique_lock<std::mutex> lock{mutex_};
+		pendingFunctors_.emplace_back(cb);
+	}
+	if (!isInLoopThread() || callingPendingFunctors_) {
+		wakeup();
+	}
 }
 
-void cm::net::EventLoop::wakeup() {
-
+void cm::net::EventLoop::wakeup() const {
+	uint64_t one = 1;
+	ssize_t n = sockets::write(wakeupFd_, &one, sizeof(one));
+	if (n != sizeof(one)) {
+		LOG_ERROR("EventLoop::wakeup() writes %d bytes instead of 8", n);
+	}
 }
 
 void cm::net::EventLoop::updateChannel(cm::net::Channel *channel) {
-
+	poller_->updateChannel(channel);
 }
 
 void cm::net::EventLoop::removeChannel(cm::net::Channel *channel) {
-
+	poller_->removeChannel(channel);
 }
 
 bool cm::net::EventLoop::hasChannel(cm::net::Channel *channel) {
@@ -93,7 +107,16 @@ bool cm::net::EventLoop::hasChannel(cm::net::Channel *channel) {
 }
 
 void cm::net::EventLoop::doPendingFunctors() {
-
+	std::vector<Functor> functions;
+	callingPendingFunctors_ = true;
+	{
+		std::unique_lock<std::mutex> lock{mutex_};
+		functions.swap(pendingFunctors_);
+	}
+	for (const Functor &functor: functions) {
+		functor();
+	}
+	callingPendingFunctors_ = false;
 }
 
 cm::net::EventLoop::~EventLoop() {

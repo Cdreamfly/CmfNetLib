@@ -37,7 +37,7 @@ namespace cm::net {
 		void queueInLoop(const Functor &cb);
 
 		//唤醒loop所在的线程
-		void wakeup();
+		void wakeup() const;
 
 		void updateChannel(Channel *channel);
 
