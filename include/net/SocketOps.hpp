@@ -3,6 +3,8 @@
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
+#include <cstring>
+#include <sys/uio.h>
 
 #include "base/Log.hpp"
 
@@ -75,11 +77,15 @@ namespace cm::net::sockets {
 		}
 	}
 
-	ssize_t read(const int fd, void *buf, size_t count) {
+	ssize_t read(const int fd, void *buf, const size_t count) {
 		return ::read(fd, buf, count);
 	}
 
-	ssize_t write(const int fd, void *buf, size_t count) {
+	ssize_t readv(const int fd, const iovec *iov, const int count) {
+		return ::readv(fd, iov, count);
+	}
+
+	ssize_t write(const int fd, const void *buf, const size_t count) {
 		return ::write(fd, buf, count);
 	}
 
@@ -104,5 +110,15 @@ namespace cm::net::sockets {
 	void setKeepAlive(const int fd, const bool on) {
 		int opt = on ? 1 : 0;
 		::setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof(opt)));
+	}
+
+	sockaddr_in6 getLocalAddr(const int fd) {
+		sockaddr_in6 localAddr{};
+		memset(&localAddr, 0, sizeof(localAddr));
+		auto addrLen = static_cast<socklen_t>(sizeof(localAddr));
+		if (::getsockname(fd, (sockaddr *) &localAddr, &addrLen) < 0) {
+			LOG_FATAL("sockets::getPeerAddr");
+		}
+		return localAddr;
 	}
 }
