@@ -13,7 +13,7 @@ namespace cm::net {
 
 	class Acceptor : private NonCopyable {
 	public:
-		using NewConnectionCallback = std::function<void(int fd, const InetAddress &)>;
+		using NewConnectionCallback = std::function<void(const int, const InetAddress &)>;
 
 		explicit Acceptor(EventLoop *, const InetAddress &, bool reUsePort);
 
