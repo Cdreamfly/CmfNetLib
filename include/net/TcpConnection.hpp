@@ -14,10 +14,10 @@ namespace cm::net {
 
 	class Socket;
 
-	class TcpConnection : private NonCopyable, public std::enable_shared_from_this<cm::net::TcpConnection> {
+	class TcpConnection : private NonCopyable, public std::enable_shared_from_this<TcpConnection> {
 	public:
 		explicit TcpConnection(EventLoop *loop, std::string name, int fd, const InetAddress &localAddr,
-		              const InetAddress &peerAddr);
+		                       const InetAddress &peerAddr);
 
 		virtual ~TcpConnection();
 
@@ -44,7 +44,7 @@ namespace cm::net {
 
 		bool connect() const { return state_ == StateE::kConnected; }
 
-		void send(const std::string &buf);
+		void send(const std::string_view &buf);
 
 		void shutdown();
 
@@ -57,9 +57,16 @@ namespace cm::net {
 			kDisconnected, kConnecting, kConnected, kDisconnecting
 		};
 
-		void sendInLoop(const std::string &msg);
+		void setState(const StateE &state) { state_ = state; }
+
+		void handleClose();
+
+		void handleError();
+
+		void sendInLoop(const std::string_view &msg);
 
 		void shutdownInLoop();
+
 	private:
 		EventLoop *loop_;
 		const std::string name_;
