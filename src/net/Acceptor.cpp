@@ -1,6 +1,7 @@
 #include "net/Acceptor.hpp"
 #include "net/InetAddress.hpp"
 #include "net/SocketOps.hpp"
+#include "base/Log.hpp"
 
 cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress &listenAddr, bool reUsePort) :
 		loop_(loop), acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),

@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 
-namespace cm {
+namespace cm::net {
 	class Buffer;
 
 	class TcpConnection;

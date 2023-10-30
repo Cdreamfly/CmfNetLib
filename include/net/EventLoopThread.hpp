@@ -14,7 +14,7 @@ namespace cm::net {
 	public:
 		using ThreadInitCallback = std::function<void(EventLoop *)>;
 
-		explicit EventLoopThread(ThreadInitCallback, const std::string &name = std::string());
+		explicit EventLoopThread(ThreadInitCallback cb = ThreadInitCallback(), const std::string &name = std::string());
 
 		virtual ~EventLoopThread();
 

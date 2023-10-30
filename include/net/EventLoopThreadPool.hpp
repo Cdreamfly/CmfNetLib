@@ -23,7 +23,7 @@ namespace cm::net {
 
 		void setThreadNum(const int num) { numThreads_ = num; }
 
-		void start(const ThreadInitCallback &cb);
+		void start(const ThreadInitCallback &cb = ThreadInitCallback());
 
 		EventLoop *getNextLoop();
 

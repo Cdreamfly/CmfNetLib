@@ -1,4 +1,6 @@
 #include "net/EventLoopThread.hpp"
+
+#include <utility>
 #include "net/EventLoop.hpp"
 
 cm::net::EventLoopThread::EventLoopThread(ThreadInitCallback cb, const std::string &name) :

@@ -1,124 +1,39 @@
 #pragma once
 
-#include <arpa/inet.h>
 #include <netinet/tcp.h>
-#include <unistd.h>
-#include <cstring>
-#include <sys/uio.h>
-
-#include "base/Log.hpp"
+#include <arpa/inet.h>
 
 namespace cm::net::sockets {
-	int createNonblockingOrDie(const sa_family_t family) {
-		int fd = ::socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TP);
-		if (fd < 0) {
-			LOG_FATAL("sockets::createNonblockingOrDie");
-		}
-		return fd;
-	}
 
-	void close(const int fd) {
-		if (::close(fd) < 0) {
-			LOG_FATAL("sockets::close");
-		}
-	}
+	int createNonblockingOrDie(sa_family_t);
 
-	void bindOrDie(const int fd, const sockaddr *addr) {
-		if (::bind(fd, addr, static_cast<socklen_t>(sizeof(sockaddr_in6))) < 0) {
-			LOG_FATAL("sockets::bindOrDie");
-		}
-	}
+	void close(int);
 
-	void listenOrDie(const int fd) {
-		if (::listen(fd, SOMAXCONN) < 0) {
-			LOG_FATAL("sockets::listen");
-		}
-	}
+	void bindOrDie(int, const sockaddr *);
 
-	int accept(const int fd, sockaddr_in6 *addr) {
-		auto len = static_cast<socklen_t>(sizeof(*addr));
-		int connFd = ::accept4(fd, (sockaddr *) addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
-		if (fd < 0) {
-			int savedErrno = errno;
-			switch (savedErrno) {
-				case EAGAIN:
-				case ECONNABORTED:
-				case EINTR:
-				case EPROTO:
-				case EPERM:
-				case EMFILE:
-					errno = savedErrno;
-					break;
-				case EBADF:
-				case EFAULT:
-				case EINVAL:
-				case ENFILE:
-				case ENOBUFS:
-				case ENOMEM:
-				case ENOTSOCK:
-				case EOPNOTSUPP:
-				LOG_FATAL("unexpected error of ::accept %d", savedErrno);
-					break;
-				default:
-				LOG_FATAL("unknown error of ::accept %d", savedErrno);
-					break;
-			}
-		}
-		return connFd;
-	}
+	void listenOrDie(int);
 
-	int connect(const int fd, const sockaddr *addr) {
-		return ::connect(fd, addr, static_cast<socklen_t>(sizeof(sockaddr_in6)));
-	}
+	int accept(int, sockaddr_in6 *);
 
-	void shutdownWrite(const int fd) {
-		if (::shutdown(fd, SHUT_WR) < 0) {
-			LOG_FATAL("sockets::shutdownWrite");
-		}
-	}
+	int connect(int, const sockaddr *);
 
-	ssize_t read(const int fd, void *buf, const size_t count) {
-		return ::read(fd, buf, count);
-	}
+	void shutdownWrite(int);
 
-	ssize_t readv(const int fd, const iovec *iov, const int count) {
-		return ::readv(fd, iov, count);
-	}
+	ssize_t read(int, void *, size_t);
 
-	ssize_t write(const int fd, const void *buf, const size_t count) {
-		return ::write(fd, buf, count);
-	}
+	ssize_t readv(int, const iovec *, int);
 
-	void setTcpNoDelay(const int fd, const bool on) {
-		int opt = on ? 1 : 0;
-		::setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &opt, static_cast<socklen_t>(sizeof(opt)));
-	}
+	ssize_t write(int, const void *, size_t);
 
-	void setReuseAddr(const int fd, const bool on) {
-		int opt = on ? 1 : 0;
-		::setsockopt(fd, IPPROTO_TCP, SO_REUSEADDR, &opt, static_cast<socklen_t>(sizeof(opt)));
-	}
+	void setTcpNoDelay(int, bool);
 
-	void setReusePort(const int fd, const bool on) {
-		int opt = on ? 1 : 0;
-		int ret = ::setsockopt(fd, IPPROTO_TCP, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof(opt)));
-		if (ret < 0 && on) {
-			LOG_FATAL("SO_REUSEPORT failed.");
-		}
-	}
+	void setReuseAddr(int, bool);
 
-	void setKeepAlive(const int fd, const bool on) {
-		int opt = on ? 1 : 0;
-		::setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof(opt)));
-	}
+	void setReusePort(int, bool);
 
-	sockaddr_in6 getLocalAddr(const int fd) {
-		sockaddr_in6 localAddr{};
-		memset(&localAddr, 0, sizeof(localAddr));
-		auto addrLen = static_cast<socklen_t>(sizeof(localAddr));
-		if (::getsockname(fd, (sockaddr *) &localAddr, &addrLen) < 0) {
-			LOG_FATAL("sockets::getPeerAddr");
-		}
-		return localAddr;
-	}
+	void setKeepAlive(int, bool);
+
+	sockaddr_in6 getLocalAddr(int);
+
+	int getSocketError(int);
 }

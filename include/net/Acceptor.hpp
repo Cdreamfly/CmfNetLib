@@ -15,7 +15,7 @@ namespace cm::net {
 	public:
 		using NewConnectionCallback = std::function<void(const int, const InetAddress &)>;
 
-		explicit Acceptor(EventLoop *, const InetAddress &, bool reUsePort);
+		explicit Acceptor(EventLoop *, const InetAddress &, bool);
 
 		virtual ~Acceptor();
 
