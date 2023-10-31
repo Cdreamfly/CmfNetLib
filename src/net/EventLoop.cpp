@@ -15,8 +15,7 @@ namespace {
 
 cm::net::EventLoop::EventLoop() : looping_(false), quit_(false), callingPendingFunctors_(false),
                                   threadId_(CurrentThread::tid()), poller_(Poller::newDefaultPoller(this)),
-                                  wakeupChannel_(std::make_unique<Channel>(this, wakeupFd_)),
-                                  currentActiveChannel_(nullptr) {
+                                  wakeupChannel_(std::make_unique<Channel>(this, wakeupFd_)) {
 	wakeupFd_ = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
 	if (wakeupFd_ < 0) {
 		LOG_FATAL("Failed in eventfd");
@@ -43,6 +42,7 @@ cm::net::EventLoop::EventLoop() : looping_(false), quit_(false), callingPendingF
 void cm::net::EventLoop::loop() {
 	looping_ = true;
 	quit_ = false;
+	LOG_INFO("EventLoop %p start looping", this);
 	while (!quit_) {
 		activeChannels_.clear();
 		//监听两类fd， client fd wake fd

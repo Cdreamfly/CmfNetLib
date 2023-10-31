@@ -5,7 +5,7 @@
 
 cm::net::EventLoopThread::EventLoopThread(ThreadInitCallback cb, const std::string &name) :
 		loop_(nullptr), exiting_(false), mutex_(),
-		thread_([&] {
+		thread_([this] {
 			EventLoop loop; //创建一个独立的EventLoop，和上面的线程一一对应， one loop per thread
 			if (callback_) {
 				callback_(&loop);

@@ -7,7 +7,7 @@
 
 cm::net::TcpConnection::TcpConnection(cm::net::EventLoop *loop, std::string name, const int fd,
                                       const cm::net::InetAddress &localAddr, const cm::net::InetAddress &peerAddr) :
-		loop_(loop), name_(std::move(name)), reading_(true), state_(StateE::kConnecting),
+		loop_(loop), name_(std::move(name)), state_(StateE::kConnecting),
 		socket_(std::make_unique<Socket>(fd)), channel_(std::make_unique<Channel>(loop, fd)),
 		localAddr_(localAddr), peerAddr_(peerAddr), highWaterMark_(64 * 1024 * 1024) {
 	channel_->setReadCallback([this](const Timestamp &receiveTime) {
@@ -32,11 +32,13 @@ cm::net::TcpConnection::TcpConnection(cm::net::EventLoop *loop, std::string name
 				outputBuffer_.retrieve(n);
 				if (outputBuffer_.readableBytes() == 0) {
 					channel_->disableWriting();
-					//唤醒loop_对应的thread线程，执行回调
-					loop_->queueInLoop([this] { writeCompleteCallback_(shared_from_this()); });
-				}
-				if (state_ == StateE::kDisconnecting) {
-					shutdownInLoop();
+					if (writeCompleteCallback_) {
+						//唤醒loop_对应的thread线程，执行回调
+						loop_->queueInLoop([this] { writeCompleteCallback_(shared_from_this()); });
+					}
+					if (state_ == StateE::kDisconnecting) {
+						shutdownInLoop();
+					}
 				}
 			} else {
 				LOG_ERROR("TcpConnection::handleWrite");
@@ -94,7 +96,7 @@ void cm::net::TcpConnection::sendInLoop(const std::string_view &msg) {
 	if (!channel_->isWriting() && outputBuffer_.readableBytes() == 0) {
 		n = sockets::write(channel_->fd(), msg.data(), msg.size());
 		if (n >= 0) {
-			remaining -= n;
+			remaining = msg.size() - n;
 			if (remaining == 0 && writeCompleteCallback_) {
 				//既然在这里数据全部发送完成，就不用再给channel设置epoll out事件了
 				loop_->queueInLoop([this] { writeCompleteCallback_(shared_from_this()); });
@@ -136,14 +138,17 @@ void cm::net::TcpConnection::shutdown() {
 }
 
 void cm::net::TcpConnection::shutdownInLoop() {
+	//数据已经发送完了再close
 	if (!channel_->isWriting()) {
 		socket_->shutdownWrite();
 	}
 }
 
 void cm::net::TcpConnection::connectEstablished() {
+	setState(StateE::kConnected);
 	channel_->tie(shared_from_this());
 	channel_->enableReading();
+	connectionCallback_(shared_from_this());
 }
 
 void cm::net::TcpConnection::connectDestroyed() {
@@ -155,6 +160,14 @@ void cm::net::TcpConnection::connectDestroyed() {
 	}
 	//把channel从poller中删除掉
 	channel_->remove();
+}
+
+void cm::net::TcpConnection::handleRead(cm::Timestamp receiveTime) {
+
+}
+
+void cm::net::TcpConnection::handleWrite() {
+
 }
 
 

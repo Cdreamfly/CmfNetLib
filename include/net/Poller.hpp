@@ -18,15 +18,15 @@ namespace cm::net {
 
 		virtual ~Poller() = default;
 
-		virtual Timestamp poll(int timeoutMs, ChannelList *activeChannels) = 0;
+		virtual Timestamp poll(int, ChannelList *) = 0;
 
-		virtual void updateChannel(Channel *channel) = 0;
+		virtual void updateChannel(Channel *) = 0;
 
-		virtual void removeChannel(Channel *channel) = 0;
+		virtual void removeChannel(Channel *) = 0;
 
-		virtual bool hasChannel(Channel *channel);
+		virtual bool hasChannel(Channel *);
 
-		static Poller *newDefaultPoller(EventLoop *loop);
+		static Poller *newDefaultPoller(EventLoop *);
 
 	protected:
 		using ChannelMap = std::unordered_map<int, Channel *>;

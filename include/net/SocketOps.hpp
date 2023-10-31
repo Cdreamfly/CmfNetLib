@@ -7,15 +7,15 @@ namespace cm::net::sockets {
 
 	int createNonblockingOrDie(sa_family_t);
 
+	void fromIpPort(const char *ip, uint16_t port, sockaddr_in *addr);
+
 	void close(int);
 
 	void bindOrDie(int, const sockaddr *);
 
 	void listenOrDie(int);
 
-	int accept(int, sockaddr_in6 *);
-
-	int connect(int, const sockaddr *);
+	int accept(int, sockaddr_in *);
 
 	void shutdownWrite(int);
 
@@ -33,7 +33,7 @@ namespace cm::net::sockets {
 
 	void setKeepAlive(int, bool);
 
-	sockaddr_in6 getLocalAddr(int);
+	sockaddr_in getLocalAddr(int);
 
 	int getSocketError(int);
 }

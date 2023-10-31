@@ -21,6 +21,7 @@ void cm::net::EPollPoller::updateChannel(cm::net::Channel *channel) {
 	} else {    //否则如果是已添加状态则调用接口是要执行修改或删除
 		if (channel->isNoneEvent()) {
 			update(EPOLL_CTL_DEL, channel);
+			channel->setIndex(kDeleted);
 		} else {
 			update(EPOLL_CTL_MOD, channel);
 		}
@@ -29,10 +30,10 @@ void cm::net::EPollPoller::updateChannel(cm::net::Channel *channel) {
 
 void cm::net::EPollPoller::removeChannel(cm::net::Channel *channel) {
 	channels_.erase(channel->fd());
-	if (channel->index() == kNew) {
+	if (channel->index() == kAdded) {
 		update(EPOLL_CTL_DEL, channel);
 	}
-	channel->setIndex(kDeleted);
+	channel->setIndex(kNew);
 }
 
 void cm::net::EPollPoller::fillActiveChannels(const int numEvents, cm::net::Poller::ChannelList *activeChannels) {
@@ -61,20 +62,21 @@ void cm::net::EPollPoller::update(const int operation, cm::net::Channel *channel
 cm::Timestamp cm::net::EPollPoller::poll(int timeoutMs, cm::net::Poller::ChannelList *activeChannels) {
 	const int numEvents = ::epoll_wait(epollFd_, &*events_.begin(), static_cast<int>(events_.size()), timeoutMs);
 	const int savedErrno = errno;
+	Timestamp now(Timestamp::now());
 	if (numEvents > 0) {
-		LOG_INFO("events happened");
+		LOG_INFO("%d events happened ", numEvents);
 		fillActiveChannels(numEvents, activeChannels);
 		if (numEvents == events_.size()) {
 			events_.resize(events_.size() * 2);
 		}
 	} else if (numEvents == 0) {
-		LOG_ERROR("nothing happened");
+		LOG_DEBUG("%s timeout!", __FUNCTION__);
 	} else {
 		if (savedErrno != EINTR) {
 			errno = savedErrno;
-			LOG_ERROR("EPollPoller::poll()");
+			LOG_DEBUG("%s timeout!", __FUNCTION__);
 		}
 	}
-	return cm::Timestamp::now();
+	return now;
 }
 

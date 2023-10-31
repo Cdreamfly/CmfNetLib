@@ -16,8 +16,7 @@ namespace cm::net {
 
 	class TcpConnection : private NonCopyable, public std::enable_shared_from_this<TcpConnection> {
 	public:
-		explicit TcpConnection(EventLoop *loop, std::string name, int fd, const InetAddress &localAddr,
-		                       const InetAddress &peerAddr);
+		explicit TcpConnection(EventLoop *, std::string, int, const InetAddress &, const InetAddress &);
 
 		virtual ~TcpConnection();
 
@@ -59,6 +58,10 @@ namespace cm::net {
 
 		void setState(const StateE &state) { state_ = state; }
 
+		void handleRead(Timestamp);
+
+		void handleWrite();
+
 		void handleClose();
 
 		void handleError();
@@ -70,7 +73,6 @@ namespace cm::net {
 	private:
 		EventLoop *loop_;
 		const std::string name_;
-		bool reading_;
 		std::atomic<StateE> state_;
 		std::unique_ptr<Socket> socket_;
 		std::unique_ptr<Channel> channel_;

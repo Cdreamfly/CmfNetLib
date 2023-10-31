@@ -7,11 +7,19 @@
 #include <sys/uio.h>
 
 int cm::net::sockets::createNonblockingOrDie(const sa_family_t family) {
-	int fd = ::socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TP);
+	int fd = ::socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
 	if (fd < 0) {
 		LOG_FATAL("sockets::createNonblockingOrDie");
 	}
 	return fd;
+}
+
+void cm::net::sockets::fromIpPort(const char *ip, uint16_t port, sockaddr_in *addr) {
+	addr->sin_family = AF_INET;
+	addr->sin_port = htobe16(port);
+	if (::inet_pton(AF_INET, ip, &addr->sin_addr) <= 0) {
+		LOG_FATAL("sockets::fromIpPort");
+	}
 }
 
 void cm::net::sockets::close(const int fd) {
@@ -21,7 +29,7 @@ void cm::net::sockets::close(const int fd) {
 }
 
 void cm::net::sockets::bindOrDie(const int fd, const sockaddr *addr) {
-	if (::bind(fd, addr, static_cast<socklen_t>(sizeof(sockaddr_in6))) < 0) {
+	if (::bind(fd, addr, static_cast<socklen_t>(sizeof(sockaddr_in))) < 0) {
 		LOG_FATAL("sockets::bindOrDie");
 	}
 }
@@ -32,9 +40,9 @@ void cm::net::sockets::listenOrDie(const int fd) {
 	}
 }
 
-int cm::net::sockets::accept(const int fd, sockaddr_in6 *addr) {
+int cm::net::sockets::accept(const int fd, sockaddr_in *addr) {
 	auto len = static_cast<socklen_t>(sizeof(*addr));
-	int connFd = ::accept4(fd, (sockaddr *) addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
+	int connFd = ::accept4(fd, (sockaddr *) &addr, &len, SOCK_NONBLOCK | SOCK_CLOEXEC);
 	if (fd < 0) {
 		int savedErrno = errno;
 		switch (savedErrno) {
@@ -62,10 +70,6 @@ int cm::net::sockets::accept(const int fd, sockaddr_in6 *addr) {
 		}
 	}
 	return connFd;
-}
-
-int cm::net::sockets::connect(const int fd, const sockaddr *addr) {
-	return ::connect(fd, addr, static_cast<socklen_t>(sizeof(sockaddr_in6)));
 }
 
 void cm::net::sockets::shutdownWrite(const int fd) {
@@ -109,8 +113,8 @@ void cm::net::sockets::setKeepAlive(const int fd, const bool on) {
 	::setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof(opt)));
 }
 
-sockaddr_in6 cm::net::sockets::getLocalAddr(const int fd) {
-	sockaddr_in6 localAddr{};
+sockaddr_in cm::net::sockets::getLocalAddr(const int fd) {
+	sockaddr_in localAddr{};
 	memset(&localAddr, 0, sizeof(localAddr));
 	auto addrLen = static_cast<socklen_t>(sizeof(localAddr));
 	if (::getsockname(fd, (sockaddr *) &localAddr, &addrLen) < 0) {

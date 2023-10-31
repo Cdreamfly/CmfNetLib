@@ -25,6 +25,7 @@ void cm::Thread::start() {
 		sem_post(&sem);
 		func_();
 	});
+	//这里必须等待获取上面新创建的线程的tid值
 	sem_wait(&sem);
 }
 

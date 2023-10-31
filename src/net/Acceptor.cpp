@@ -6,7 +6,7 @@
 cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress &listenAddr, bool reUsePort) :
 		loop_(loop), acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
 		acceptChannel_(loop, acceptSocket_.fd()), listening_(false) {
-	acceptSocket_.setReusePort(true);
+	acceptSocket_.setReuseAddr(true);
 	acceptSocket_.setReusePort(reUsePort);
 	acceptSocket_.bindAddress(listenAddr);
 	acceptChannel_.setReadCallback([&](const Timestamp &) {

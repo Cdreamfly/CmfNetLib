@@ -20,20 +20,22 @@ namespace cm::net {
 			::close(epollFd_);
 		}
 
-		cm::Timestamp poll(int timeoutMs, ChannelList *activeChannels) override;
+		cm::Timestamp poll(int, ChannelList *) override;
 
-		void updateChannel(Channel *channel) override;
+		void updateChannel(Channel *) override;
 
-		void removeChannel(Channel *channel) override;
-
-	private:
-		void fillActiveChannels(int numEvents, ChannelList *activeChannels) ;
-
-		void update(int operation, Channel *channel) const;
+		void removeChannel(Channel *) override;
 
 	private:
-		static const int kInitEventListSize = 16;
+		void fillActiveChannels(int, ChannelList *);
+
+		void update(int, Channel *) const;
+
 		using EventList = std::vector<epoll_event>;
+		static const int kInitEventListSize = 16;
+	private:
+
+
 		int epollFd_;
 		EventList events_;
 	};

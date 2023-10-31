@@ -28,21 +28,21 @@ namespace cm::net {
 		 * 解决办法是提供Channel::tie(const boost::shared_ptr<void>&)这个函数，用于延长某些对象（可以是Channel对象，也可以是其owner对象）的生命期，使之长过Channel::handleEvent()函数。
 		 * @param receiveTime
 		 */
-		void handleEvent(const Timestamp &receiveTime);
+		void handleEvent(const Timestamp &);
 
-		void setReadCallback(const ReadEventCallback &cb) { readCallback_ = cb; }
+		void setReadCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
 
-		void setWriteCallback(const EventCallback &cb) { writeCallback_ = cb; }
+		void setWriteCallback(EventCallback cb) { writeCallback_ = std::move(cb); }
 
-		void setCloseCallback(const EventCallback &cb) { closeCallback_ = cb; }
+		void setCloseCallback(EventCallback cb) { closeCallback_ = std::move(cb); }
 
-		void setErrorCallback(const EventCallback &cb) { errorCallback_ = cb; }
+		void setErrorCallback(EventCallback cb) { errorCallback_ = std::move(cb); }
 
 		[[nodiscard]] bool isNoneEvent() const { return events_ == kNoneEvent; }
 
-		[[nodiscard]] bool isWriting() const { return events_ == kWriteEvent; }
+		[[nodiscard]] bool isWriting() const { return events_ & kWriteEvent; }
 
-		[[nodiscard]] bool isReading() const { return events_ == kReadEvent; }
+		[[nodiscard]] bool isReading() const { return events_ & kReadEvent; }
 
 		void enableReading() {
 			events_ |= kReadEvent;
@@ -65,7 +65,7 @@ namespace cm::net {
 		}
 
 		void disableAll() {
-			events_ |= kNoneEvent;
+			events_ = kNoneEvent;
 			update();
 		}
 
@@ -100,16 +100,16 @@ namespace cm::net {
 		void update();
 
 		void handleEventWithGuard(const Timestamp &receiveTime) {
-			if ((events_ & POLLHUP) && !(events_ & POLLIN)) {
+			if ((receivedEvents & POLLHUP) && !(receivedEvents & POLLIN)) {
 				if (closeCallback_) closeCallback_();
 			}
-			if (events_ & (POLLERR | POLLNVAL)) {
-				if (errorCallback_)errorCallback_();
+			if (receivedEvents & (POLLERR | POLLNVAL)) {
+				if (errorCallback_) errorCallback_();
 			}
-			if (events_ & (POLLIN | POLLPRI | POLLRDHUP)) {
+			if (receivedEvents & (POLLIN | POLLPRI | POLLRDHUP)) {
 				if (readCallback_) readCallback_(receiveTime);
 			}
-			if (events_ & POLLOUT) {
+			if (receivedEvents & POLLOUT) {
 				if (writeCallback_) writeCallback_();
 			}
 		}
