@@ -20,7 +20,7 @@ namespace cm::net {
 			kReusePort,
 		};
 	public:
-		explicit TcpServer(EventLoop *, const InetAddress &, std::string , const Option &);
+		explicit TcpServer(EventLoop *, const InetAddress &, std::string, const Option &option = Option::kNoReusePort);
 
 		virtual ~TcpServer();
 
@@ -38,6 +38,13 @@ namespace cm::net {
 
 	private:
 		using ConnectionMap = std::unordered_map<std::string, TcpConnectionPtr>;
+
+		void newConnection(int, const InetAddress &);
+
+		void removeConnection(const TcpConnectionPtr &);
+
+		void removeConnectionInLoop(const TcpConnectionPtr &);
+
 	private:
 		EventLoop *loop_{};   //baseLoop 用户定义的loop
 		const std::string ipPort_;
