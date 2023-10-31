@@ -16,8 +16,8 @@ file(GLOB SRC_FILES
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_library(cm STATIC ${SRC_FILES})
+#add_library(cm STATIC ${SRC_FILES})
 
-#add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
+add_executable(${CMAKE_PROJECT_NAME} main.cpp ${SRC_FILES})
 
 find_package(Threads)
