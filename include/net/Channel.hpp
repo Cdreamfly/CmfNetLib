@@ -17,18 +17,13 @@ namespace cm::net {
 	class Channel : private NonCopyable {
 	public:
 		using EventCallback = std::function<void()>;
-		using ReadEventCallback = std::function<void(const Timestamp &)>;
+		using ReadEventCallback = std::function<void(Timestamp)>;
 
-		Channel(EventLoop *loop, const int fd) : loop_(loop), fd_(fd),
-		                                         events_(0), receivedEvents(0), index_(-1), tied_(false) {}
+		explicit Channel(EventLoop *, int);
 
-		/**
-		 * 当对方断开TCP连接，这个IO事件会触发Channel::handleEvent()调用，后者会调用用户提供的CloseCallback，而用户代码在onClose()中有可能析构Channel对象，这就造成了灾难。
-		 * 等于说Channel::handleEvent()执行到一半的时候，其所属的Channel对象本身被销毁了。这时程序立刻core dump就是最好的结果了。
-		 * 解决办法是提供Channel::tie(const boost::shared_ptr<void>&)这个函数，用于延长某些对象（可以是Channel对象，也可以是其owner对象）的生命期，使之长过Channel::handleEvent()函数。
-		 * @param receiveTime
-		 */
-		void handleEvent(const Timestamp &);
+		~Channel();
+
+		void handleEvent(Timestamp);
 
 		void setReadCallback(ReadEventCallback cb) { readCallback_ = std::move(cb); }
 
@@ -38,11 +33,15 @@ namespace cm::net {
 
 		void setErrorCallback(EventCallback cb) { errorCallback_ = std::move(cb); }
 
+		void tie(const std::shared_ptr<void> &);
+
+		[[nodiscard]] int fd() const { return fd_; }
+
+		[[nodiscard]] int events() const { return events_; }
+
+		void setReceivedEvents_(const int event) { receivedEvents_ = event; } // used by pollers
+
 		[[nodiscard]] bool isNoneEvent() const { return events_ == kNoneEvent; }
-
-		[[nodiscard]] bool isWriting() const { return events_ & kWriteEvent; }
-
-		[[nodiscard]] bool isReading() const { return events_ & kReadEvent; }
 
 		void enableReading() {
 			events_ |= kReadEvent;
@@ -69,64 +68,36 @@ namespace cm::net {
 			update();
 		}
 
-		/**
-		 * 防止当Channel被手动remove掉，Channel还在执行回调函数
-		 * @param obj
-		 */
-		void tie(const std::shared_ptr<void> &obj) {
-			tie_ = obj;
-			tied_ = true;
-		}
+		[[nodiscard]] bool isWriting() const { return events_ & kWriteEvent; }
 
-		[[nodiscard]] int fd() const { return fd_; }
-
-		[[nodiscard]] int events() const { return events_; }
-
-		void setReceivedEvents(const int receivedEvent) { receivedEvents = receivedEvent; }
+		[[nodiscard]] bool isReading() const { return events_ & kReadEvent; }
 
 		[[nodiscard]] int index() const { return index_; }
 
-		void setIndex(const int index) { index_ = index; }
+		void setIndex(const int idx) { index_ = idx; }
 
-		[[nodiscard]] EventLoop *ownerLoop() const { return loop_; }
+		EventLoop *ownerLoop() { return loop_; }
 
 		void remove();
 
 	private:
-		/**
-		 * 当改变Channel所表示fd的events事件后，update负责在poller里面改变fd响应的事件epoll_ctl
-		 *
-		 */
+
 		void update();
 
-		void handleEventWithGuard(const Timestamp &receiveTime) {
-			if ((receivedEvents & POLLHUP) && !(receivedEvents & POLLIN)) {
-				if (closeCallback_) closeCallback_();
-			}
-			if (receivedEvents & (POLLERR | POLLNVAL)) {
-				if (errorCallback_) errorCallback_();
-			}
-			if (receivedEvents & (POLLIN | POLLPRI | POLLRDHUP)) {
-				if (readCallback_) readCallback_(receiveTime);
-			}
-			if (receivedEvents & POLLOUT) {
-				if (writeCallback_) writeCallback_();
-			}
-		}
+		void handleEventWithGuard(Timestamp);
 
-		static const int kNoneEvent = 0;
-		static const int kReadEvent = POLLIN | POLLPRI;
-		static const int kWriteEvent = POLLOUT;
+		static const int kNoneEvent;
+		static const int kReadEvent;
+		static const int kWriteEvent;
 
-	private:
-		EventLoop *loop_{};     //事件循环
-		const int fd_;          //fd，Poller监听的对象
-		int events_{};          //注册fd感兴趣的事件
-		int receivedEvents{};   //Poller返回的具体发生的事件
-		int index_{};
+		EventLoop *loop_;
+		const int fd_;
+		int events_;
+		int receivedEvents_; // it's the received event types of epoll or poll
+		int index_; // used by Poller.
 
 		std::weak_ptr<void> tie_;
-		bool tied_{};
+		bool tied_;
 
 		ReadEventCallback readCallback_;
 		EventCallback writeCallback_;

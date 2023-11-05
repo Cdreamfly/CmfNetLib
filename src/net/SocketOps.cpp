@@ -97,12 +97,12 @@ void cm::net::sockets::setTcpNoDelay(const int fd, const bool on) {
 
 void cm::net::sockets::setReuseAddr(const int fd, const bool on) {
 	int opt = on ? 1 : 0;
-	::setsockopt(fd, IPPROTO_TCP, SO_REUSEADDR, &opt, static_cast<socklen_t>(sizeof(opt)));
+	::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &opt, static_cast<socklen_t>(sizeof(opt)));
 }
 
 void cm::net::sockets::setReusePort(const int fd, const bool on) {
 	int opt = on ? 1 : 0;
-	int ret = ::setsockopt(fd, IPPROTO_TCP, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof(opt)));
+	int ret = ::setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &opt, static_cast<socklen_t>(sizeof(opt)));
 	if (ret < 0 && on) {
 		LOG_FATAL("SO_REUSEPORT failed.");
 	}
@@ -110,7 +110,7 @@ void cm::net::sockets::setReusePort(const int fd, const bool on) {
 
 void cm::net::sockets::setKeepAlive(const int fd, const bool on) {
 	int opt = on ? 1 : 0;
-	::setsockopt(fd, IPPROTO_TCP, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof(opt)));
+	::setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &opt, static_cast<socklen_t>(sizeof(opt)));
 }
 
 sockaddr_in cm::net::sockets::getLocalAddr(const int fd) {

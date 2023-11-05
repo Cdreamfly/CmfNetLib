@@ -8,34 +8,25 @@
 namespace cm::net {
 	class EPollPoller : public Poller {
 	public:
-		explicit EPollPoller(EventLoop *loop) : Poller(loop),
-		                                        epollFd_(epoll_create1(EPOLL_CLOEXEC)),
-		                                        events_(kInitEventListSize) {
-			if (epollFd_ < 0) {
-				LOG_FATAL("EPollPoller::EPollPoller");
-			}
-		}
+		explicit EPollPoller(EventLoop *);
 
-		~EPollPoller() override {
-			::close(epollFd_);
-		}
+		~EPollPoller() override;
 
-		cm::Timestamp poll(int, ChannelList *) override;
+		Timestamp poll(int, ChannelList *) override;
 
 		void updateChannel(Channel *) override;
 
 		void removeChannel(Channel *) override;
 
 	private:
-		void fillActiveChannels(int, ChannelList *);
+		static const int kInitEventListSize = 16;
+
+		void fillActiveChannels(int, ChannelList *) const;
 
 		void update(int, Channel *) const;
 
-		using EventList = std::vector<epoll_event>;
-		static const int kInitEventListSize = 16;
+		typedef std::vector<struct epoll_event> EventList;
 	private:
-
-
 		int epollFd_;
 		EventList events_;
 	};

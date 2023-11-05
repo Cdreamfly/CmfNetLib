@@ -3,13 +3,15 @@
 #include "net/SocketOps.hpp"
 #include "base/Log.hpp"
 
-cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress &listenAddr, bool reUsePort) :
-		loop_(loop), acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
-		acceptChannel_(loop, acceptSocket_.fd()), listening_(false) {
+cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress &listenAddr, bool reUsePort)
+		: loop_(loop),
+		  acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
+		  acceptChannel_(loop, acceptSocket_.fd()),
+		  listening_(false) {
 	acceptSocket_.setReuseAddr(true);
-	acceptSocket_.setReusePort(reUsePort);
+	acceptSocket_.setReusePort(true);
 	acceptSocket_.bindAddress(listenAddr);
-	acceptChannel_.setReadCallback([&](const Timestamp &) {
+	acceptChannel_.setReadCallback([this](Timestamp) {
 		InetAddress peerAddr;
 		int connFd = acceptSocket_.accept(peerAddr);
 		if (connFd >= 0) {
@@ -19,9 +21,9 @@ cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress
 				sockets::close(connFd);
 			}
 		} else {
-			LOG_ERROR("in Acceptor::handleRead");
+			LOG_ERROR("accept err:%d", errno);
 			if (errno == EMFILE) {
-				LOG_ERROR("sockfd reached limit!");
+				LOG_ERROR("sock fd reached limit!");
 			}
 		}
 	});

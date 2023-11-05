@@ -8,23 +8,23 @@
 namespace cm::net {
 	class InetAddress : public Copyable {
 	public:
-		explicit InetAddress(uint16_t port = 0, bool loopBackOnly = false);
-
-		explicit InetAddress(const std::string &ip, uint16_t port);
+		explicit InetAddress(uint16_t port = 0, const std::string& ip = "127.0.0.1");
 
 		explicit InetAddress(const sockaddr_in &addr) : addr_(addr) {}
 
 		[[nodiscard]] std::string toIp() const;
 
-		[[nodiscard]] uint16_t toPort() const { return be16toh(addr_.sin_port); }
+		[[nodiscard]] std::string toIpPort() const;
 
-		[[nodiscard]] std::string toIpPort() const { return this->toIp() + ":" + std::to_string(this->toPort()); }
+		[[nodiscard]] uint16_t toPort() const;
+
+		[[nodiscard]] const sockaddr_in *getSockAddr() const { return &addr_; }
+
+		void setSockAddr(const sockaddr_in &addr) { addr_ = addr; }
 
 		[[nodiscard]] sa_family_t family() const { return addr_.sin_family; }
 
-		[[nodiscard]] const sockaddr *getSocketAddr() const {
-			return (const sockaddr *) &addr_;
-		}
+		[[nodiscard]] const sockaddr *getSocketAddr() const { return (const sockaddr *) &addr_; }
 
 		void setSocketAddr(const sockaddr_in &addr) { addr_ = addr; }
 

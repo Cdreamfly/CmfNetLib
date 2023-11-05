@@ -19,12 +19,13 @@ namespace cm::net {
 
 		explicit EventLoopThreadPool(EventLoop *, std::string);
 
-		virtual ~EventLoopThreadPool();
+		~EventLoopThreadPool();
 
-		void setThreadNum(const int num) { numThreads_ = num; }
+		void setThreadNum(const int numThreads) { numThreads_ = numThreads; }
 
 		void start(const ThreadInitCallback &cb = ThreadInitCallback());
 
+		// 如果工作在多线程中，baseLoop_默认以轮询的方式分配channel给sub loop
 		EventLoop *getNextLoop();
 
 		std::vector<EventLoop *> getAllLoops();
@@ -34,7 +35,8 @@ namespace cm::net {
 		[[nodiscard]] const std::string &name() const { return name_; }
 
 	private:
-		EventLoop *baseLoop_;
+
+		EventLoop *baseLoop_; // EventLoop loop;
 		std::string name_;
 		bool started_;
 		int numThreads_;

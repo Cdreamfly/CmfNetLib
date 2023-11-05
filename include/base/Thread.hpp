@@ -14,7 +14,7 @@ namespace cm {
 
 		explicit Thread(ThreadFunc, std::string name = std::string());
 
-		virtual ~Thread();
+		~Thread();
 
 		void start();
 
@@ -34,10 +34,10 @@ namespace cm {
 	private:
 		bool started_;
 		bool joined_;
-		pid_t tid_;
-		std::string name_;
 		std::shared_ptr<std::thread> thread_;
+		pid_t tid_;
 		ThreadFunc func_;
+		std::string name_;
 		static std::atomic_int numCreated_;
 	};
 }

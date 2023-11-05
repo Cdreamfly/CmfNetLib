@@ -7,9 +7,9 @@ namespace cm::net {
 
 	class Socket : private NonCopyable {
 	public:
-		explicit Socket(const int fd) : sockFd_(fd) {}
+		explicit Socket(int fd) : sockFd_(fd) {}
 
-		virtual ~Socket();
+		~Socket();
 
 		[[nodiscard]] int fd() const { return sockFd_; }
 
