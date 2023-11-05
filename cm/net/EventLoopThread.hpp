@@ -1,10 +1,8 @@
 #pragma once
 
-#include "base/NonCopyable.hpp"
-#include "base/Thread.hpp"
-#include <mutex>
-#include <string>
-#include <functional>
+#include "cm/base/NonCopyable.hpp"
+#include "cm/base/Thread.hpp"
+
 #include <condition_variable>
 
 namespace cm::net {

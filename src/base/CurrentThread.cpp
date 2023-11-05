@@ -1,4 +1,6 @@
-#include "base/CurrentThread.hpp"
+#include "cm/base/CurrentThread.hpp"
+#include <sys/syscall.h>
+#include <unistd.h>
 
 __thread int cm::CurrentThread::t_cachedTid = 0;
 

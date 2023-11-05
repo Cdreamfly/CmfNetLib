@@ -1,10 +1,9 @@
 #pragma once
 
-#include "base/NonCopyable.hpp"
+#include "cm/base/NonCopyable.hpp"
 
 #include <functional>
 #include <string>
-#include <vector>
 #include <memory>
 
 namespace cm::net {

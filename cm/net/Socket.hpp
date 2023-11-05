@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/NonCopyable.hpp"
+#include "cm/base/NonCopyable.hpp"
 
 namespace cm::net {
 	class InetAddress;

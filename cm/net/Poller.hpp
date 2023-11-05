@@ -1,7 +1,8 @@
 #pragma once
 
-#include "base/NonCopyable.hpp"
-#include "base/Timestamp.hpp"
+#include "cm/base/NonCopyable.hpp"
+#include "cm/base/Timestamp.hpp"
+
 #include <vector>
 #include <unordered_map>
 

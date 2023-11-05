@@ -1,5 +1,7 @@
-#include "net/Channel.hpp"
-#include "net/EventLoop.hpp"
+#include "cm/net/Channel.hpp"
+#include "cm/net/EventLoop.hpp"
+
+#include <sys/poll.h>
 
 const int cm::net::Channel::kNoneEvent = 0;
 const int cm::net::Channel::kReadEvent = POLLIN | POLLPRI;

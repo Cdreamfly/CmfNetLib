@@ -1,7 +1,7 @@
-#include "net/Acceptor.hpp"
-#include "net/InetAddress.hpp"
-#include "net/SocketOps.hpp"
-#include "base/Log.hpp"
+#include "cm/net/Acceptor.hpp"
+#include "cm/net/InetAddress.hpp"
+#include "cm/net/SocketOps.hpp"
+#include "cm/base/Log.hpp"
 
 cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress &listenAddr, bool reUsePort)
 		: loop_(loop),
@@ -9,7 +9,7 @@ cm::net::Acceptor::Acceptor(cm::net::EventLoop *loop, const cm::net::InetAddress
 		  acceptChannel_(loop, acceptSocket_.fd()),
 		  listening_(false) {
 	acceptSocket_.setReuseAddr(true);
-	acceptSocket_.setReusePort(true);
+	acceptSocket_.setReusePort(reUsePort);
 	acceptSocket_.bindAddress(listenAddr);
 	acceptChannel_.setReadCallback([this](Timestamp) {
 		InetAddress peerAddr;

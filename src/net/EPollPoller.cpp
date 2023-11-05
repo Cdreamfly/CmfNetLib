@@ -1,6 +1,8 @@
+#include "cm/net/EPollPoller.hpp"
+#include "cm/net/Channel.hpp"
+
+#include <csignal>
 #include <cstring>
-#include "net/EPollPoller.hpp"
-#include "net/Channel.hpp"
 
 namespace {
 	// channel未添加到poller中

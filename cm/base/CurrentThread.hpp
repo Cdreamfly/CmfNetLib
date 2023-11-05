@@ -1,9 +1,5 @@
 #pragma once
 
-#include <sys/syscall.h>
-#include <unistd.h>
-#include <cstdio>
-
 namespace cm::CurrentThread {
 	extern __thread int t_cachedTid;
 

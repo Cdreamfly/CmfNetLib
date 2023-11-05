@@ -1,11 +1,10 @@
-#include "net/TcpConnection.hpp"
-
-#include <utility>
-#include "net/Socket.hpp"
-#include "net/Channel.hpp"
-#include "net/EventLoop.hpp"
-#include "net/SocketOps.hpp"
-#include "base/Log.hpp"
+#include <csignal>
+#include "cm/net/TcpConnection.hpp"
+#include "cm/net/Socket.hpp"
+#include "cm/net/Channel.hpp"
+#include "cm/net/EventLoop.hpp"
+#include "cm/net/SocketOps.hpp"
+#include "cm/base/Log.hpp"
 
 static cm::net::EventLoop *CheckLoopNotNull(cm::net::EventLoop *loop) {
 	if (loop == nullptr) {
@@ -121,7 +120,7 @@ void cm::net::TcpConnection::shutdownInLoop() {
 void cm::net::TcpConnection::connectEstablished() {
 	setState(StateE::kConnected);
 	channel_->tie(shared_from_this());
-	channel_->enableReading(); // 向poller注册channel的epollin事件
+	channel_->enableReading(); // 向poller注册channel的epoll in事件
 	// 新连接建立，执行回调
 	connectionCallback_(shared_from_this());
 }

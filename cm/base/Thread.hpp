@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/NonCopyable.hpp"
+#include "cm/base/NonCopyable.hpp"
 #include <thread>
 #include <memory>
 #include <functional>

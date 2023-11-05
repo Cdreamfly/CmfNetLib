@@ -1,10 +1,8 @@
-#include "base/Thread.hpp"
-#include "base/CurrentThread.hpp"
+#include "cm/base/Thread.hpp"
+#include "cm/base/CurrentThread.hpp"
 
 #include <semaphore.h>
-
 #include <memory>
-#include <utility>
 
 std::atomic_int cm::Thread::numCreated_(0);
 
